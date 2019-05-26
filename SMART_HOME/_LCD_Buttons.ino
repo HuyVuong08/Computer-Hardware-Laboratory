@@ -102,7 +102,7 @@ void LCD_Button_setup ()
 void Greeting() {
     lcd.clear();
     lcd.setCursor(2, 0);            
-    lcd.print("SMART_SCALE");
+    lcd.print("SMART_HOME");
     lcd.setCursor(4, 1);            
     lcd.print("WELCOME!");
 

@@ -16,21 +16,15 @@ bool error; //to catch the response of sendSms
 
 #define SWITCH_PIN 3 // Connect switch pin here
 
-
-
 Bounce debouncer = Bounce();
 
 int currentState = -1;
 
 int lastState = -1;
 
-
-
 void setup(){
     SIM800L_Setup ();
 }
-
-
 
 void loop(){
     On_SIM80L ();
@@ -53,7 +47,6 @@ void SIM800L_Setup ()
     debouncer.interval(100);
 
     //digitalWrite(BUTTON_PIN, HIGH);
-
 }
 
 void On_SIM80L ()

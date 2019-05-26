@@ -10,21 +10,32 @@ Ticker sTick;
 
 volatile int wd_count = 0;
 
-void setup() {
+void setup() 
+{
     Serial.begin(57600);
   
     Serial.println("Start setting up");
     // set up components
+    RFIF_Setup ()
+    Serial.println("RFID set up done");    
+
+    SIM800L_Setup ();
+    Serial.println("SIM800L set up done");    
+
     EEPROM_setup();
-    //LoadCell_setup();
-    Serial.println("LoadCell set up done");
+    Serial.println("EEPROM set up done");  
+
     Connection_setup();
-    Serial.println("Connection set up done");    
+    Serial.println("Connection set up done");
+
     LCD_Button_setup();
+    Serial.println("LCD and Buttons set up done");
+
     sTick.attach(1,ISRWatchdog);
     //Setting up watchdog ISR
     Serial.println("Watchdog set up done");
     Serial.println("All done");
+
 
     // init state
     state       = St_Greeting;
@@ -35,7 +46,8 @@ void setup() {
 }
 
 
-void loop() {
+void loop() 
+{
 /*
     Serial.println(state);
     Serial.println(sub_state);
