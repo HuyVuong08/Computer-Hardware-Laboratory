@@ -105,41 +105,43 @@ void Greeting() {
     state = St_Wait;
 }
 
-void printCalib_doing() {
-    lcd.clear();
-    lcd.setCursor(2, 0);
-    lcd.print("Calibrating");
-    lcd.setCursor(6, 1);
-    lcd.print("...");
-}
-void printCalib_done() {
-    lcd.clear();
-    lcd.setCursor(2, 0);            
-    lcd.print("Calibration");
-    lcd.setCursor(4, 1);
-    lcd.print("Complete");
-}
-
-void ViewMode1 ()
+void Home ()
 {
     lcd.clear();
-    lcd.setCursor(0,0); 
-    lcd.print("Weight:");
-    lcd.setCursor(8,0); 
-    lcd.print(newly_data);
-    lcd.setCursor(12,0); 
-    lcd.print("Kg");
+    lcd.setCursor(0,1); 
+    lcd.print("HUM: ");
+    lcd.setCursor(5,1); 
+    lcd.print(Hunmidity);
+
+    lcd.setCursor(7,1); 
+    lcd.print("TEM: ");
+    lcd.setCursor(12,1); 
+    lcd.print(Temperature);
 }
 
-void ViewMode2 ()
+void LogIn ()
 {
     lcd.clear();
-    lcd.setCursor(0,0); 
-    lcd.print("Count:");
-    lcd.setCursor(7,0); 
-    lcd.print(n_apples);
-    lcd.setCursor(11,0); 
-    lcd.print("Unit");
+    lcd.setCursor(4,0); 
+    lcd.print("LOG IN");
+    lcd.setCursor(4,1); 
+    lcd.print("SUCCESS");
+}
+
+void LogOut ()
+{
+    lcd.clear();
+    lcd.setCursor(4,0); 
+    lcd.print("LOCKED");
+}
+
+void Register ()
+{
+    lcd.clear();
+    lcd.setCursor(3,0); 
+    lcd.print("REGISTER");
+    lcd.setCursor(3,1); 
+    lcd.print("NEW CARD");
 }
 
 void choice (int a)
@@ -166,13 +168,23 @@ Button whichButPressed ()
     return Bt_NoPress;
 }
 
-void processView (int &a)
+void Menu_Down (int &a)
 {
     if (a == 2)
     {
         a = 0;
     }
     a++;
+    choice (a);
+}
+
+void Menu_Up (int &a)
+{
+    if (a == 0)
+    {
+        a = 2;
+    }
+    a--;
     choice (a);
 }
 

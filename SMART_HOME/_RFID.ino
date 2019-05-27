@@ -39,7 +39,6 @@ MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
 MFRC522::MIFARE_Key key; 
 
 // Init array that will store new NUID 
-byte nuidPICC[4];
 byte Password[16] = 
 {   0x01, 0x02, 0x03, 0x04, //  1,  2,   3,  4,
     0x05, 0x06, 0x07, 0x08, //  5,  6,   7,  8,
@@ -144,7 +143,7 @@ void On_RFID_LogIn ()
   }
 }
 
-void On_RFID_SignUp () {
+void On_RFID_Register () {
 
   // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
   MFRC522::MIFARE_Key key;
