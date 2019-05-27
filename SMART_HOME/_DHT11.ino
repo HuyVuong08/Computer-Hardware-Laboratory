@@ -1,3 +1,4 @@
+/*
 #include <dht.h>
 
 dht DHT;
@@ -15,3 +16,4 @@ void loop(){
   Serial.println(DHT.humidity);
   delay(1000);
 }
+*/

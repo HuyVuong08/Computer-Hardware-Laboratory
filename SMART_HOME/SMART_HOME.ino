@@ -16,7 +16,7 @@ void setup()
   
     Serial.println("Start setting up");
     // set up components
-    RFIF_Setup ()
+    RFIF_Setup ();
     Serial.println("RFID set up done");    
 
     SIM800L_Setup ();

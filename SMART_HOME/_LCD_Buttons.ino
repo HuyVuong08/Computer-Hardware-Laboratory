@@ -16,7 +16,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
  *SpeedPin là địa chỉ của chân điều khiển tốc độ băng chuyền
  */
 
-typedef enum {Bt_NoPress, Bt_StaSto, Bt_SpDown, Bt_SpUp, Bt_Reset, Bt_Calib, Bt_View} Button;
+typedef enum {Bt_NoPress, Bt_1, Bt_2, Bt_3, Bt_4} Button;
 
 
 bool    isStarted   = false;                   // Start/stop value có giá trị 1(stop) hoặc 2(start)
@@ -33,28 +33,20 @@ void LCD_Button()
 {
     switch (whichButPressed())
     {
-        case Bt_StaSto:
-            Serial.println("StaSto pressed");
-            StartStop();
-            break;
-        case Bt_SpUp:
-            Serial.println("SpeUp pressed");
-            SpeedUp();
-            break;
-        case Bt_SpDown:
-            Serial.println("SpeDo pressed");
+        case Bt_4:
+            Serial.println("Up Arrow pressed");
             SpeedDown();
             break;
-        case Bt_Reset:
-            Serial.println("Reset pressed");
+        case Bt_3:
+            Serial.println("Backward Button pressed");
             Reset();
             break;
-        case Bt_View:
-            Serial.println("View pressed");
+        case Bt_2:
+            Serial.println("Down Arrow pressed");
             processView(ViewMode);
             break;
-        case Bt_Calib:
-            Serial.println("Calib pressed");
+        case Bt_1:
+            Serial.println("Enter Button pressed");
             
             if (isStarted) {
                 prev_state = state;
@@ -162,18 +154,14 @@ Button whichButPressed ()
 {
     int tmp = analogRead(A0);
 
-    if (tmp >= 300 && tmp <= 340)
-        return Bt_StaSto;
-    if (tmp >= 355 && tmp <= 400)
-        return Bt_SpUp;;
     if (tmp >= 415 && tmp <= 490)
-        return Bt_SpDown;
+        return Bt_4;
     if (tmp >= 570 && tmp <= 630)
-        return Bt_Reset;
+        return Bt_3;
     if (tmp >= 840 && tmp <= 890)
-        return Bt_View;
+        return Bt_2;
     if (tmp == 1024)
-        return Bt_Calib;
+        return Bt_1;
 
     return Bt_NoPress;
 }
