@@ -144,6 +144,46 @@ void Register ()
     lcd.print("NEW CARD");
 }
 
+void Send_SMS ()
+{
+    lcd.clear();
+    lcd.setCursor(1,0); 
+    lcd.print("SEND SMS TO");
+    lcd.setCursor(2,1); 
+    lcd.print(Phone);
+}
+
+void Menu_1_SendSMS ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("SEND SMS");
+    lcd.setCursor(13,1); 
+    lcd.print("RG");
+}
+
+void Menu_2_Register ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("REGISTER");
+
+    lcd.setCursor(13,0); 
+    lcd.print("SS");
+
+    lcd.setCursor(13,1); 
+    lcd.print("LO");
+}
+
+void Menu_3_LogOut ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("LOG OUT");
+    lcd.setCursor(13,0); 
+    lcd.print("RG");
+}
+
 void choice (int a)
 {
     if (a == 1)

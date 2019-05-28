@@ -1,17 +1,24 @@
-#include <dht.h>
+#include "DHT.h"
 
-dht DHT;
+const int DHTPIN = 2;
 
-#define DHT11_PIN 2
+const int DHTTYPE = DHT11;
+
+DHT = dht(DHTPIN, DHTTYPE);
+
+
 void setup(){
-
-	Serial.begin(9600);
+  Serial.begin(9600);
+  dht begin()
 }
 void loop(){
-  int chk = DHT.read11(DHT11_PIN);
+
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
+  
   Serial.print("Temperature = ");
-  Serial.println(DHT.temperature);
+  Serial.println(t);
   Serial.print("Humidity = ");
-  Serial.println(DHT.humidity);
+  Serial.println(h);
   delay(1000);
 }
