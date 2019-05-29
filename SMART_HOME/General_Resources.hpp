@@ -1,8 +1,10 @@
 #ifndef GENERAL_RESOURCES_HPP_
 #define GENERAL_RESOURCES_HPP_
 
-int     newly_data = 0;         // store newly weighted data, used in many .ino files         
-int     n_apples   = 0;         // no. apples weighted
+float Humidity;
+float Temperature;
+
+bool LoggedIn = false;
 
 // for states
 enum State {St_Greeting, St_Calibrate, St_ConnectionCheck, St_ReadSensor, St_Wait, St_LCD_Button,
@@ -20,7 +22,5 @@ enum SubState sub_state;
 enum SpeedLv {Lv1 = 15, Lv2 = 20, Lv3 = 25, Lv4 = 30};
 enum SpeedLv Speed = Lv1;
 
-float Humidity;
-float Temperature;
 
 #endif
