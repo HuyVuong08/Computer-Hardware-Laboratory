@@ -8,7 +8,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 
 /*
- *MBut là địa chỉ chân của nút ViewMode
+ *MBut là địa chỉ chân của nút Menu
  *SSBut là địa chỉ chân nút Start/Stop
  *SDBut và SUBut là địa chỉ chân nút giảm tốc và tăng tốc băng chuyền 
  *RBut là địa chỉ chân nút Reset
@@ -17,10 +17,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
  */
 
 typedef enum {Bt_NoPress, Bt_1, Bt_2, Bt_3, Bt_4} Button;
-
-
-bool    isStarted   = false;                   // Start/stop value có giá trị 1(stop) hoặc 2(start)
-int     ViewMode    = 0;                       // Có 2 loại ViewMode (1 và 2)
+typedef enum {Menu_Off, Menu_LV1} Menu;
+typedef enum {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3} Menu_Lv1;
 
 
 extern int newly_data;                          // Biến Weight lưu khối lượng của trái vừa được cân
@@ -43,7 +41,7 @@ void LCD_Button()
             break;
         case Bt_2:
             Serial.println("Down Arrow pressed");
-            processView(ViewMode);
+            processView(Menu);
             break;
         case Bt_1:
             Serial.println("Enter Button pressed");
@@ -85,11 +83,45 @@ void LCD_Button()
 // Setup ban đầu cho LCD, xuất ra màn hình "Welcome!" 
 // Lưu ý địa chỉ bus ic là 0x27 nếu thay đổi địa chỉ ic thì vào LCD_and_Buttons.h sửa lại
 void LCD_Button_setup ()
-{    
+{   
     lcd.begin(16,2);
     lcd.init();
     lcd.backlight();
 }
+
+void Enter_Button ()
+{
+    Menu     = Menu_LV1;
+    Menu_Lv1 = Menu_Lv1_1;
+    return;
+}
+
+void Backward_Button ()
+{
+    Menu = Menu_Off;
+    return;
+}
+
+void Down_Button ()
+{
+    if (Menu_Lv1 == Me)
+    {
+        a = 0;
+    }
+    a++;
+    choice (a);
+}
+
+void Menu_Up (int &a)
+{
+    if (a == 0)
+    {
+        a = 2;
+    }
+    a--;
+    choice (a);
+}
+
 
 void Greeting() {
     lcd.clear();
@@ -147,9 +179,9 @@ void Register ()
 void choice (int a)
 {
     if (a == 1)
-        ViewMode1 ();
+        Menu1 ();
     else
-        ViewMode2 ();
+        Menu2 ();
 }
 
 Button whichButPressed ()
@@ -168,199 +200,12 @@ Button whichButPressed ()
     return Bt_NoPress;
 }
 
-void Menu_Down (int &a)
+void Choose_Menu_Lv1 ()
 {
-    if (a == 2)
-    {
-        a = 0;
-    }
-    a++;
-    choice (a);
-}
-
-void Menu_Up (int &a)
-{
-    if (a == 0)
-    {
-        a = 2;
-    }
-    a--;
-    choice (a);
-}
-
-void printSpeed (int Speed)
-{
-    lcd.clear();
-    lcd.setCursor(3,0);
-
-    switch (Speed)
-    {
-        case Lv1:
-            lcd.print("SPEED: 1/4");
-            lcd.setCursor(0,1); 
-            lcd.print("####");  
-            break;
-        case Lv2:
-            lcd.print("SPEED: 2/4");
-            lcd.setCursor(0,1); 
-            lcd.print("########");  
-            break;
-        case Lv3:
-            lcd.print("SPEED: 3/4");
-            lcd.setCursor(0,1); 
-            lcd.print("############");
-            break;
-        case Lv4:
-            lcd.print("SPEED: 4/4");
-            lcd.setCursor(0,1); 
-            lcd.print("################");
-            break;
+    if (Menu != Menu_LV1)
+        return;
     
-        default:
-            break;
-    }
-
-    lcd.setCursor(3,1); 
-    lcd.print('|');
-    lcd.setCursor(7,1); 
-    lcd.print('|');
-    lcd.setCursor(11,1); 
-    lcd.print('|');
-    lcd.setCursor(15,1); 
-    lcd.print('|'); 
-}
-
-
-void StartStop ()
-{
-    isStarted = !isStarted;
-    if (isStarted == false)
-    {
-        lcd.clear();
-        lcd.setCursor(4,0); 
-        lcd.print("STOPPED");
-        lcd.setCursor(3,1); 
-        lcd.print('|');
-        lcd.setCursor(7,1); 
-        lcd.print('|');
-        lcd.setCursor(11,1); 
-        lcd.print('|');
-        lcd.setCursor(15,1); 
-        lcd.print('|');
-    }
-    else
-    {
-        printSpeed (Speed);
-    }
-}
-
-void SpeedUp ()
-{
-    if (isStarted == false)        // check nếu động cơ chưa Start thì ko speed up
-    {    
-        lcd.clear();
-        lcd.setCursor(1,0); 
-        lcd.print("Engine Has Not");
-        lcd.setCursor(2,1); 
-        lcd.print("Started Yet!");
-    }
-    else
-    {
-        
-        if (Speed == Lv4)
-        {
-            lcd.clear();
-            lcd.setCursor(1,0); 
-            lcd.print("Top-SPEED: 4/4");
-            lcd.setCursor(0,1); 
-            lcd.print("################");
-            lcd.setCursor(3,1); 
-            lcd.print('|');
-            lcd.setCursor(7,1); 
-            lcd.print('|');
-            lcd.setCursor(11,1); 
-            lcd.print('|');
-            lcd.setCursor(15,1); 
-            lcd.print('|');
-        }
-        else
-        {
-            if (Speed == Lv1)
-            {
-            Speed = Lv2;
-            }
-            else if (Speed == Lv2)
-            {
-            Speed = Lv3;
-            }
-            else if (Speed == Lv3)
-            {
-            Speed = Lv4;
-            }
-            printSpeed (Speed);        
-        }
-    }
-}
-
-void SpeedDown ()
-{ 
-    if (isStarted == false)        // check nếu động cơ chưa Start thì ko speed down
-    {    
-        lcd.clear();
-        lcd.setCursor(1,0); 
-        lcd.print("Engine Has Not");
-        lcd.setCursor(2,1); 
-        lcd.print("Started Yet!");
-    }
-    else
-    {
-        
-        if (Speed == Lv1)
-        {
-            lcd.clear();
-            lcd.setCursor(1,0); 
-            lcd.print("Min-SPEED: 1/4");
-            lcd.setCursor(0,1); 
-            lcd.print("####");
-            lcd.setCursor(3,1); 
-            lcd.print('|');
-            lcd.setCursor(7,1); 
-            lcd.print('|');
-            lcd.setCursor(11,1); 
-            lcd.print('|');
-            lcd.setCursor(15,1); 
-            lcd.print('|');
-        }
-        else
-        {
-            if (Speed == Lv4)
-            {
-            Speed = Lv3;
-            }
-            else if (Speed == Lv3)
-            {
-            Speed = Lv2;
-            }
-            else if (Speed == Lv2)
-            {
-            Speed = Lv1;
-            }
-            printSpeed (Speed);        
-        }
-    }
-}
-
-void Reset ()
-{
-    n_apples = 0;
-
-    lcd.clear();
-    lcd.setCursor(6,0); 
-    lcd.print("Reset");
-    lcd.setCursor(0,1); 
-    lcd.print("Count:");
-    lcd.setCursor(7,1); 
-    lcd.print(n_apples);
-    lcd.setCursor(11,1); 
-    lcd.print("Unit");
+    if (Menu_Lv1 == Menu_Lv1_1)
+    
+    else if (Menu_Lv1 == Menu_Lv1_2)
 }
