@@ -5,6 +5,8 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
+
+
 /*
  *MBut là địa chỉ chân của nút ViewMode
  *SSBut là địa chỉ chân nút Start/Stop
@@ -21,45 +23,47 @@ bool    isStarted   = false;                   // Start/stop value có giá tr�
 int     ViewMode    = 0;                       // Có 2 loại ViewMode (1 và 2)
 
 
-extern float Humidity;
-extern float Temperature;
+extern int newly_data;                          // Biến Weight lưu khối lượng của trái vừa được cân
+extern int n_apples;
 extern enum SubState sub_state;
 
 Button whichButPressed ();
 
 void LCD_Button()
 {
-    switch (whichButPressed())
-    {
-        case Bt_4:
-            Serial.println("Up Arrow pressed");
-            SpeedDown();
-            break;
-        case Bt_3:
-            Serial.println("Backward Button pressed");
-            Reset();
-            break;
-        case Bt_2:
-            Serial.println("Down Arrow pressed");
-            processView(ViewMode);
-            break;
-        case Bt_1:
-            Serial.println("Enter Button pressed");
+
+    whichButPressed ();
+    // switch (whichButPressed())
+    // {
+    //     case Bt_4:
+    //         Serial.println("Up Arrow pressed");
+    //         SpeedDown();
+    //         break;
+    //     case Bt_3:
+    //         Serial.println("Backward Button pressed");
+    //         Reset();
+    //         break;
+    //     case Bt_2:
+    //         Serial.println("Down Arrow pressed");
+    //         processView(ViewMode);
+    //         break;
+    //     case Bt_1:
+    //         Serial.println("Enter Button pressed");
             
-            if (isStarted) {
-                prev_state = state;
-                state = St_Calibrate;
-                sub_state = st_calib_noload;
+    //         if (isStarted) {
+    //             prev_state = state;
+    //             state = St_Calibrate;
+    //             sub_state = st_calib_noload;
                 
-                return;
-            }
+    //             return;
+    //         }
 
-        default:
-            break;
-    }
+    //     default:
+    //         break;
+    // }
 
-    if (isStarted)
-        state = St_Wait;
+    // if (isStarted)
+    //     state = St_Wait;
 }
 
 
@@ -109,7 +113,7 @@ void Home ()
     lcd.setCursor(0,1); 
     lcd.print("HUM: ");
     lcd.setCursor(5,1); 
-    lcd.print(Humidity);
+    lcd.print(Hunmidity);
 
     lcd.setCursor(7,1); 
     lcd.print("TEM: ");
@@ -193,6 +197,7 @@ void choice (int a)
 Button whichButPressed ()
 {
     int tmp = analogRead(A0);
+    serial.print (tmp);
 
     if (tmp >= 415 && tmp <= 490)
         return Bt_4;

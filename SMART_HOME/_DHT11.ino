@@ -1,19 +1,30 @@
-/*
-#include <dht.h>
+#include "DHT.h"        // including the library of DHT11 temperature and humidity sensor
+#define DHTTYPE DHT11   // DHT 11
 
-dht DHT;
+#define dht_dpin D8
+DHT dht(dht_dpin, DHTTYPE); 
 
-#define DHT11_PIN 2
-void setup(){
+extern float Humidity;
+extern float Temperature;
 
-	Serial.begin(9600);
+void DHT11_Setup()
+{ 
+  dht.begin();
+  Serial.begin(9600);
+  Serial.println("Humidity and temperature \n\n");
+  Serial.println("==========================================");
+  delay(700);
 }
-void loop(){
-  int chk = DHT.read11(DHT11_PIN);
-  Serial.print("Temperature = ");
-  Serial.println(DHT.temperature);
-  Serial.print("Humidity = ");
-  Serial.println(DHT.humidity);
-  delay(1000);
+
+void On_DHT11() 
+{
+  Humidity = dht.readHumidity();
+  Temperature = dht.readTemperature();         
+  Serial.print("Current humidity = ");
+  Serial.print(h);
+  Serial.print("%  ");
+  Serial.print("temperature = ");
+  Serial.print(t); 
+  Serial.println("C  ");
+  delay(800);
 }
-*/
