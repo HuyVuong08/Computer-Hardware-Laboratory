@@ -5,8 +5,6 @@
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-
-
 /*
  *MBut là địa chỉ chân của nút Menu
  *SSBut là địa chỉ chân nút Start/Stop
@@ -21,8 +19,8 @@ typedef enum {Menu_Off, Menu_LV1} Menu;
 typedef enum {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3} Menu_Lv1;
 
 
-extern int newly_data;                          // Biến Weight lưu khối lượng của trái vừa được cân
-extern int n_apples;
+extern float Humidity;
+extern float Temperature;
 extern enum SubState sub_state;
 
 Button whichButPressed ();
@@ -143,7 +141,7 @@ void Home ()
     lcd.setCursor(0,1); 
     lcd.print("HUM: ");
     lcd.setCursor(5,1); 
-    lcd.print(Hunmidity);
+    lcd.print(Humidity);
 
     lcd.setCursor(7,1); 
     lcd.print("TEM: ");
@@ -174,6 +172,46 @@ void Register ()
     lcd.print("REGISTER");
     lcd.setCursor(3,1); 
     lcd.print("NEW CARD");
+}
+
+void Send_SMS ()
+{
+    lcd.clear();
+    lcd.setCursor(1,0); 
+    lcd.print("SEND SMS TO");
+    lcd.setCursor(2,1); 
+    lcd.print(Phone);
+}
+
+void Menu_1_SendSMS ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("SEND SMS");
+    lcd.setCursor(13,1); 
+    lcd.print("RG");
+}
+
+void Menu_2_Register ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("REGISTER");
+
+    lcd.setCursor(13,0); 
+    lcd.print("SS");
+
+    lcd.setCursor(13,1); 
+    lcd.print("LO");
+}
+
+void Menu_3_LogOut ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("LOG OUT");
+    lcd.setCursor(13,0); 
+    lcd.print("RG");
 }
 
 void choice (int a)

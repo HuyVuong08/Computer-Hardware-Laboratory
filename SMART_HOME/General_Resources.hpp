@@ -20,6 +20,7 @@ enum SubState sub_state;
 enum SpeedLv {Lv1 = 15, Lv2 = 20, Lv3 = 25, Lv4 = 30};
 enum SpeedLv Speed = Lv1;
 
-
+float Humidity;
+float Temperature;
 
 #endif

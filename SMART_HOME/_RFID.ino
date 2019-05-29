@@ -31,27 +31,29 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define SS_PIN 10
-#define RST_PIN 9
+#define SS_PIN D4
+#define RST_PIN D3
  
-MFRC522 rfid(SS_PIN, RST_PIN); // Instance of the class
+MFRC522 mfrc522(SS_PIN, RST_PIN); // Instance of the class
 
 MFRC522::MIFARE_Key key; 
 
 // Init array that will store new NUID 
+
 byte Password[16] = 
 {   0x01, 0x02, 0x03, 0x04, //  1,  2,   3,  4,
     0x05, 0x06, 0x07, 0x08, //  5,  6,   7,  8,
     0x09, 0x0a, 0xff, 0x0b, //  9, 10, 255, 11,
     0x0c, 0x0d, 0x0e, 0x0f  // 12, 13, 14, 15
 };
+
 boolean LoggedIn = true;               //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 void RFIF_Setup ()
 {
   Serial.begin(9600);
   SPI.begin(); // Init SPI bus
-  rfid.PCD_Init(); // Init MFRC522 
+  mfrc522.PCD_Init(); // Init MFRC522 
 }
 
 void On_RFID_LogIn ()
@@ -143,7 +145,8 @@ void On_RFID_LogIn ()
   }
 }
 
-void On_RFID_Register () {
+void On_RFID_SignUp () 
+{
 
   // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
   MFRC522::MIFARE_Key key;
@@ -204,28 +207,3 @@ void On_RFID_Register () {
   mfrc522.PICC_HaltA(); // Halt PICC
   mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
 }
-
-/**
- * Helper routine to dump a byte array as hex values to Serial. 
- */
-void printHex(byte *buffer, byte bufferSize) 
-{
-  for (byte i = 0; i < bufferSize; i++) 
-  {
-    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    Serial.print(buffer[i], HEX);
-  }
-}
-
-/**
- * Helper routine to dump a byte array as dec values to Serial.
- */
-void printDec(byte *buffer, byte bufferSize) 
-{
-  for (byte i = 0; i < bufferSize; i++) 
-  {
-    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    Serial.print(buffer[i], DEC);
-  }
-}
-
