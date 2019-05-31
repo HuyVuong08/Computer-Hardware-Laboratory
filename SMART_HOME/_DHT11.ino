@@ -18,13 +18,36 @@ void DHT11_Setup()
 
 void On_DHT11() 
 {
-  Humidity = dht.readHumidity();
-  Temperature = dht.readTemperature();         
-  Serial.print("Current humidity = ");
-  Serial.print(h);
-  Serial.print("%  ");
-  Serial.print("temperature = ");
-  Serial.print(t); 
-  Serial.println("C  ");
-  delay(800);
+    switch (sub_state)
+    {
+        case st_readSensor:
+    
+            if (dht.read())
+            {
+                Humidity = dht.readHumidity();
+                Temperature = dht.readTemperature();         
+                Serial.print("Current humidity = ");
+                Serial.print(Humidity);
+                Serial.print("%  ");
+                Serial.print("temperature = ");
+                Serial.print(Temperature); 
+                Serial.println("C  ");
+                delay(800);
+            }
+            else 
+            {
+                Serial.println("DHT11 not found. Try again...");
+                
+                sub_state = st_wait; 
+                setTimer(1);
+                startTimer();
+            }
+            break;
+
+        case st_wait: 
+            if (isTimeOut())
+                sub_state = st_readSensor;
+            break;
+    }
 }
+
