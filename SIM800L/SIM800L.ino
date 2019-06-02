@@ -14,7 +14,7 @@ char* number;
 
 bool error; //to catch the response of sendSms
 
-#define SWITCH_PIN 3 // Connect switch pin here
+#define SWITCH_PIN D5 // Connect switch pin here
 
 
 
