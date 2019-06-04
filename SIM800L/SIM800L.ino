@@ -14,7 +14,7 @@ char* number;
 
 bool error; //to catch the response of sendSms
 
-#define SWITCH_PIN D5 // Connect switch pin here
+#define SWITCH_PIN D8 // Connect switch pin here
 
 
 
@@ -45,7 +45,7 @@ void SIM800L_Setup ()
     closedText="Door has been closed"; //text for the message.
     openText="Door has been opened"; //text for the message.
 
-    number="xxxxxxxxxx"; //sms phone number
+    number="0933792267"; //sms phone number
 
     pinMode(SWITCH_PIN, INPUT_PULLUP);
 

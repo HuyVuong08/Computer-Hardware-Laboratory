@@ -23,22 +23,24 @@
 #include <MFRC522.h>
 
 #define RST_PIN         D0          // Configurable, see typical pin layout above
-#define SS_PIN          D4          // Configurable, see typical pin layout above
+#define SS_PIN          D3          // Configurable, see typical pin layout above
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
 byte Password[18] = "123";
 byte block = 1;
 
-void setup() 
+bool LoggedIn;
+
+void setup ()
 {
   On_RFID_Setup ();
 }
 
-void loop() 
+void loop ()
 {
-  On_RFID_Resgister ();
   On_RFID_LogIn ();
+  Serial.println (LoggedIn);
 }
 
 void On_RFID_Setup ()
@@ -46,7 +48,6 @@ void On_RFID_Setup ()
   Serial.begin(9600);        // Initialize serial communications with the PC
   SPI.begin();               // Init SPI bus
   mfrc522.PCD_Init();        // Init MFRC522 card
-  Serial.println ("Done");
 }
 
 void On_RFID_Resgister ()
@@ -78,13 +79,13 @@ void On_RFID_Resgister ()
   MFRC522::StatusCode status;
   byte len;
 
-/*
-  Serial.setTimeout(20000L) ;     // wait until 20 seconds for input from serial
-  // Ask personal data: Family name
-  Serial.println(F("Type Family name, ending with #"));
-  len = Serial.readBytesUntil('#', (char *) buffer, 30) ; // read family name from serial
-  for (byte i = len; i < 30; i++) buffer[i] = ' ';     // pad with spaces
-*/
+  /*
+    Serial.setTimeout(20000L) ;     // wait until 20 seconds for input from serial
+    // Ask personal data: Family name
+    Serial.println(F("Type Family name, ending with #"));
+    len = Serial.readBytesUntil('#', (char *) buffer, 30) ; // read family name from serial
+    for (byte i = len; i < 30; i++) buffer[i] = ' ';     // pad with spaces
+  */
 
   //block = 1;
   //Serial.println(F("Authenticating using key A..."));
@@ -162,10 +163,13 @@ void On_RFID_LogIn ()
     return;
   }
 
-  //PRINT LAST NAME
+
   for (uint8_t i = 0; i < 16; i++) {
-    Serial.write(buffer[i] );
+    if (buffer[i] != Password[i])
+      LoggedIn = false;
   }
+  
+  LoggedIn = true;
 
 
   //----------------------------------------
@@ -173,6 +177,7 @@ void On_RFID_LogIn ()
   Serial.println(F("\n**End Reading**\n"));
 
   delay(1000); //change value if you want to read cards faster
+
 
   mfrc522.PICC_HaltA();
   mfrc522.PCD_StopCrypto1();
