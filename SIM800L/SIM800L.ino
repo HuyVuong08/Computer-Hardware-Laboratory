@@ -1,79 +1,51 @@
-#include <Sim800l.h>
-
-#include <Bounce2.h>
-
-#include <SoftwareSerial.h> //is necesary for the library!!
-
-Sim800l Sim800l; //to declare the library
-
-char* closedText;
-
-char * openText;
-
-char* number;
-
-bool error; //to catch the response of sendSms
-
-#define SWITCH_PIN D5 // Connect switch pin here
-
-
-
-Bounce debouncer = Bounce();
-
-int currentState = -1;
-
-int lastState = -1;
-
-
-
-void setup(){
-    SIM800L_Setup ();
-}
-
-
-
-void loop(){
-    On_SIM80L ();
-}
-
-void SIM800L_Setup ()
-{
+#include <SoftwareSerial.h>
+SoftwareSerial sim(9, 10);
+int _timeout;
+String _buffer;
+String number = "+84933792267";
+void setup() {
+    delay(7000); //delay for 7 seconds to make sure the modules get the signal
     Serial.begin(9600);
-
-    Sim800l.begin(); // initializate the library.
-
-    closedText="Door has been closed"; //text for the message.
-    openText="Door has been opened"; //text for the message.
-
-    number="xxxxxxxxxx"; //sms phone number
-
-    pinMode(SWITCH_PIN, INPUT_PULLUP);
-
-    debouncer.attach(SWITCH_PIN);
-    debouncer.interval(100);
-
-    //digitalWrite(BUTTON_PIN, HIGH);
-
+    _buffer.reserve(50);
+    Serial.println("Sistem Started...");
+    sim.begin(9600);
+    delay(1000);
+}
+void loop() {
+    callNumber();  
+    delay(10000);
+}
+void SendMessage()
+{
+    //Serial.println ("Sending Message");
+    sim.println("AT+CMGF=1");    //Sets the GSM Module in Text Mode
+    delay(1000);
+    //Serial.println ("Set SMS Number");
+    sim.println("AT+CMGS=\"" + number + "\"\r"); //Mobile phone number to send message
+    delay(1000);
+    String SMS = "Hello, how are you?";
+    sim.println(SMS);
+    delay(100);
+    sim.println((char)26);// ASCII code of CTRL+Z
+    delay(1000);
+    _buffer = _readSerial();
+}
+String _readSerial() {
+    _timeout = 0;
+    while  (!sim.available() && _timeout < 12000  )
+    {
+        delay(13);
+        _timeout++;
+    }
+    if (sim.available()) {
+        return sim.readString();
+    }
 }
 
-void On_SIM80L ()
-{
-    debouncer.update();
-
-    currentState = debouncer.read();
-
-    if (currentState != lastState)
-    {
-        if(currentState == HIGH)
-        {
-            Serial.println("open");
-            error=Sim800l.sendSms(number,openText);
-        }
-        else
-        {
-            error=Sim800l.sendSms(number,closedText);
-            Serial.println("closed");
-        }
-        lastState = currentState;
-    }
+void callNumber() {
+    sim.print (F("ATD"));
+    sim.print (number);
+    sim.print (F(";\r\n"));
+    _buffer = _readSerial();
+    Serial.println(_buffer);
 }
