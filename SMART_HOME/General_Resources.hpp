@@ -7,7 +7,7 @@ float Temperature;
 bool LoggedIn = false;
 
 // for states
-enum State {St_Greeting, St_Calibrate, St_ConnectionCheck, St_ReadSensor, St_Wait, St_LCD_Button,
+enum State {St_Greeting, St_RFID_Unlock, St_ConnectionCheck, St_ReadSensor, St_Wait, St_LCD_Button,
             St_Send,  St_SaveMem};
 enum State   state, prev_state;
 

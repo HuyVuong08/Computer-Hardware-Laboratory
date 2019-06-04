@@ -49,7 +49,7 @@ void    Wait() {
     if (isTimeOut()) {
         if (prev_state == St_Greeting) 
         {
-            state = St_Calibrate;
+            state = St_RFID_Unlock;
             sub_state = st_calib_noload;
         }
         else 
