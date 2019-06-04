@@ -61,12 +61,12 @@ void loop()
     switch (state) {
         case St_Greeting: {
             Serial.println("on St_Greeting");
-            Greeting();
+            On_Greeting();
             break;
         }
-        case St_Calibrate: {
-            Serial.println("on St_Calibrate");
-            Calibrate();
+        case St_RFID_Unlock: {
+            Serial.println("on St_RFID_Unlock");
+            On_RFID_LogIn ();
             break;
         }
         case St_ConnectionCheck: {

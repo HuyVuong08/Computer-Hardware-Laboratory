@@ -119,7 +119,6 @@ void On_RFID_LogIn ()
   for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 
   //some variables we need
-  byte block;
   byte len;
   MFRC522::StatusCode status;
 
@@ -143,44 +142,11 @@ void On_RFID_LogIn ()
 
   //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
 
-  //-------------------------------------------
-
-  Serial.print(F("Name: "));
-
-  byte buffer1[18];
-
-  block = 4;
-  len = 18;
-
-  //------------------------------------------- GET FIRST NAME
-  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 4, &key, &(mfrc522.uid)); //line 834 of MFRC522.cpp file
-  if (status != MFRC522::STATUS_OK) {
-    Serial.print(F("Authentication failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-
-  status = mfrc522.MIFARE_Read(block, buffer1, &len);
-  if (status != MFRC522::STATUS_OK) {
-    Serial.print(F("Reading failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-
-  //PRINT FIRST NAME
-  for (uint8_t i = 0; i < 16; i++)
-  {
-    if (buffer1[i] != 32)
-    {
-      Serial.write(buffer1[i]);
-    }
-  }
-  Serial.print(" ");
-
+  
   //---------------------------------------- GET LAST NAME
 
-  byte buffer2[18];
-  block = 1;
+  byte buffer[18];
+  //block = 1;
 
   status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid)); //line 834
   if (status != MFRC522::STATUS_OK) {
@@ -189,7 +155,7 @@ void On_RFID_LogIn ()
     return;
   }
 
-  status = mfrc522.MIFARE_Read(block, buffer2, &len);
+  status = mfrc522.MIFARE_Read(block, buffer, &len);
   if (status != MFRC522::STATUS_OK) {
     Serial.print(F("Reading failed: "));
     Serial.println(mfrc522.GetStatusCodeName(status));
@@ -198,7 +164,7 @@ void On_RFID_LogIn ()
 
   //PRINT LAST NAME
   for (uint8_t i = 0; i < 16; i++) {
-    Serial.write(buffer2[i] );
+    Serial.write(buffer[i] );
   }
 
 

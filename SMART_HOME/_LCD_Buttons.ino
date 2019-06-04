@@ -19,15 +19,14 @@ typedef enum {Menu_Off, Menu_LV1, Menu_Chosen} Menu;
 typedef enum {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3} Menu_Lv1;
 
 
+extern bool LoggedIn;
 extern float Humidity;
 extern float Temperature;
-extern bool LoggedIn;
 extern enum SubState sub_state;
 
 Button whichButPressed ();
 
 // Setup ban đầu cho LCD, xuất ra màn hình "Welcome!" 
-// Lưu ý địa chỉ bus ic là 0x27 nếu thay đổi địa chỉ ic thì vào LCD_and_Buttons.h sửa lại
 void LCD_Button_setup ()
 {   
     lcd.begin(16,2);
@@ -37,23 +36,33 @@ void LCD_Button_setup ()
 
 void LCD_Button()
 {
+    if (LoggedIn == false)
+    {
+        Locked ();
+        state = St_Wait;
+        return;
+    }
+
     switch (whichButPressed())
     {
         case Bt_4:
             Serial.println("Up Arrow pressed");
-            SpeedDown();
+            Up_Button ();
             break;
+
         case Bt_3:
             Serial.println("Backward Button pressed");
-            Reset();
+            Backward_Button ();
             break;
+
         case Bt_2:
             Serial.println("Down Arrow pressed");
-            processView(Menu);
+            Down_Button ();
             break;
+
         case Bt_1:
             Serial.println("Enter Button pressed");
-            
+            Enter_Button();
             if (isStarted) {
                 prev_state = state;
                 state = St_Calibrate;
@@ -66,7 +75,7 @@ void LCD_Button()
             break;
     }
 
-    if (isStarted)
+    if (LoggedIn)
         state = St_Wait;
 }
 
@@ -104,12 +113,6 @@ Button whichButPressed ()
 
 void Enter_Button ()
 {
-    if (LoggedIn == false)
-    {
-        Locked ();
-        return;
-    }
-
     switch (Menu)
     {
     case Menu_Off:
@@ -128,12 +131,6 @@ void Enter_Button ()
 
 void Backward_Button ()
 {
-    if (LoggedIn == false)
-    {
-        Locked ();
-        return;
-    }
-
     switch (Menu)
     {
     case Menu_Chosen:
@@ -151,12 +148,6 @@ void Backward_Button ()
 
 void Down_Button ()
 {
-    if (LoggedIn == false)
-    {
-        Locked ();
-        return;
-    }
-
     if (Menu == Menu_Off || Menu == Menu_Chosen)
         return;
 
@@ -182,12 +173,6 @@ void Down_Button ()
 
 void Up_Button ()
 {
-    if (LoggedIn == false)
-    {
-        Locked ();
-        return;
-    }
-
     if (Menu == Menu_Off || Menu == Menu_Chosen)
         return;
 
@@ -211,7 +196,7 @@ void Up_Button ()
     Display_Menu_Lv1 ();
 }
 
-void Greeting() {
+void On_Greeting() {
     lcd.clear();
     lcd.setCursor(3, 0);            
     lcd.print("SMART_HOME");
