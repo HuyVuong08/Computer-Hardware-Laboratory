@@ -43,7 +43,7 @@ void On_RFID_Setup ()
     mfrc522.PCD_Init();        // Init MFRC522 card
 }
 
-void On_RFID_Resgister ()
+void On_RFID_Register ()
 {
     // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
     MFRC522::MIFARE_Key key;
@@ -106,6 +106,9 @@ void On_RFID_Resgister ()
     Serial.println(" ");
     mfrc522.PICC_HaltA(); // Halt PICC
     mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
+
+    prev_state = St_Register;
+    state = St_LCD_Button;
 }
 
 void On_RFID_LogInAndLogOut () 
@@ -180,6 +183,6 @@ void On_RFID_LogInAndLogOut ()
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
 
-    prev_state = state;
+    prev_state = St_Unlock;
     state = St_LCD_Button;
 }

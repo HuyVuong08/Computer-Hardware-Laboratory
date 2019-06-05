@@ -65,10 +65,16 @@ void loop()
             On_Greeting();
             break;
         }
-        case St_RFID_Unlock: 
+        case St_Unlock: 
         {
-            Serial.println("on St_RFID_Unlock");
+            Serial.println("on St_Unlock");
             On_RFID_LogInAndLogOut ();
+            break;
+        }
+        case St_Register:
+        {
+            Serial.println("on St_Register");
+            On_RFID_Register ();
             break;
         }
         case St_ConnectionCheck: 

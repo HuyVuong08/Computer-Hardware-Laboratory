@@ -46,7 +46,7 @@ void LCD_Button()
     case St_RFID_Unlock:
         if (Passwordmatched == true && LoggedIn == true)
         {
-            LogInSuccess ();
+            LogIn_Success ();
             state = St_Wait;
         }
         else if (Passwordmatched == true && LoggedIn == false)
@@ -56,7 +56,7 @@ void LCD_Button()
         }
         else    
         {   
-            LogInFail ();
+            LogIn_Fail ();
             state = St_Wait;
         }
         return;
@@ -280,13 +280,13 @@ void Home ()
 void Locked ()
 {
     lcd.clear();
-    lcd.setCursor(5,0); 
+    lcd.setCursor(4,0); 
     lcd.print("PLEASE");
-    lcd.setCursor(5,1); 
+    lcd.setCursor(4,1); 
     lcd.print("LOG IN");
 }
 
-void LogInSuccess ()
+void LogIn_Success ()
 {
     lcd.clear();
     lcd.setCursor(5,0); 
@@ -295,13 +295,22 @@ void LogInSuccess ()
     lcd.print("GRANTED");
 }
 
-void LogInFail ()
+void LogIn_Fail ()
 {
     lcd.clear();
     lcd.setCursor(5,0); 
     lcd.print("REQUEST");
     lcd.setCursor(5,1); 
     lcd.print("DENIED");
+}
+
+void Register_Success ()
+{
+    lcd.clear();
+    lcd.setCursor(1,0); 
+    lcd.print("AUTHORIZATION");
+    lcd.setCursor(4,1); 
+    lcd.print("COMPLETE");
 }
 
 void Menu_Chosen_SendSMS ()
@@ -326,7 +335,7 @@ void Menu_Chosen_Register ()
 {
     lcd.clear();
     lcd.setCursor(4,0); 
-    lcd.print("REGISTER");
+    lcd.print("SCANNING");
     lcd.setCursor(4,1); 
     lcd.print("NEW CARD");
 }
@@ -394,10 +403,14 @@ void Display_Menu_Chosen ()
     {
     case Menu_Lv1_1:
         Menu_Chosen_SendSMS ();
+        prev_state = St_LCD_Button;
+        state = St_SendSMS;
         break;
     
     case Menu_Lv1_2:
         Menu_Chosen_Register ();
+        prev_state = St_LCD_Button;
+        state = St_Register;
         break;
 
     case Menu_Lv1_3:
