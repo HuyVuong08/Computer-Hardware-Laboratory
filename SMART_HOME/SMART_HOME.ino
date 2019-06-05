@@ -59,44 +59,58 @@ void loop()
     
 
     switch (state) {
-        case St_Greeting: {
+        case St_Greeting: 
+        {
             Serial.println("on St_Greeting");
             On_Greeting();
             break;
         }
-        case St_RFID_Unlock: {
+        case St_RFID_Unlock: 
+        {
             Serial.println("on St_RFID_Unlock");
-            On_RFID_LogIn ();
+            On_RFID_LogInAndLogOut ();
             break;
         }
-        case St_ConnectionCheck: {
+        case St_ConnectionCheck: 
+        {
             //Serial.println("on St_ConCheck");
             ConnectionCheck();
             break;
         }
-        case St_ReadSensor: {
+        case St_ReadSensor: 
+        {
             // Serial.println("on ReadSensor");
             ReadSensor();
             break;
         }
-        case St_Wait: {
+        case St_Wait: 
+        {
             // Serial.println("on Wait");
             Wait();
             break;
         }
-        case St_LCD_Button: {
+        case St_LCD_Button: 
+        {
             Serial.println("on LCD");
             LCD_Button();
             break;
         }
-        case St_Send: {
+        case St_Send: 
+        {
             // Serial.println("on Send");
             Send();
             break;
         }
-        case St_SaveMem: {
+        case St_SaveMem: 
+        {
             // Serial.println("on SaveMem");
             SaveMem();
+            break;
+        }
+        case St_SendSMS:
+        {
+            // Serial.println("on SaveMem");
+            On_SIM800L_SendSMS ();
             break;
         }
     }
