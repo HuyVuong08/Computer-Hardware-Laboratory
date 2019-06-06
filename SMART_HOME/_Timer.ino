@@ -51,7 +51,7 @@ void    Wait()
     {
         if (prev_state == St_Greeting) 
         {
-            state = St_RFID_Unlock;
+            state = St_Unlock;
         }
         else 
         {
