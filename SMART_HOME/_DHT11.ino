@@ -26,13 +26,9 @@ void On_DHT11()
             {
                 Humidity = dht.readHumidity();
                 Temperature = dht.readTemperature();         
-                Serial.print("Current humidity = ");
-                Serial.print(Humidity);
-                Serial.print("%  ");
-                Serial.print("temperature = ");
-                Serial.print(Temperature); 
-                Serial.println("C  ");
-                delay(800);
+
+                prev_state = state;
+                state = St_ConnectionCheck;
             }
             else 
             {
