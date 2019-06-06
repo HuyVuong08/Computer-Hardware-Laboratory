@@ -13,6 +13,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
  *CBut là địa chỉ chân nút calibate
  *SpeedPin là địa chỉ của chân điều khiển tốc độ băng chuyền
  */
+bool Start = false;
+
 
 typedef enum {Bt_NoPress, Bt_1, Bt_2, Bt_3, Bt_4} Button;
 typedef enum {Menu_Off, Menu_LV1, Menu_Chosen} Menu;
@@ -20,9 +22,12 @@ typedef enum {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3} Menu_Lv1;
 
 
 extern bool LoggedIn;
+extern bool PasswordMatched;
 extern float Humidity;
 extern float Temperature;
+extern enum State    state, prev_state;
 extern enum SubState sub_state;
+
 
 Button whichButPressed ();
 
@@ -36,12 +41,30 @@ void LCD_Button_setup ()
 
 void LCD_Button()
 {
-    if (LoggedIn == false)
+    switch (prev_state)
     {
-        Locked ();
-        state = St_Wait;
+    case St_RFID_Unlock:
+        if (Passwordmatched == true && LoggedIn == true)
+        {
+            LogIn_Success ();
+            state = St_Wait;
+        }
+        else if (Passwordmatched == true && LoggedIn == false)
+        {
+            Menu_Chosen_LogOut ();
+            state = St_Wait;
+        }
+        else    
+        {   
+            LogIn_Fail ();
+            state = St_Wait;
+        }
         return;
+    
+    default:
+        break;
     }
+    
 
     switch (whichButPressed())
     {
@@ -75,7 +98,7 @@ void LCD_Button()
             break;
     }
 
-    if (LoggedIn)
+    if (Start)
         state = St_Wait;
 }
 
@@ -113,6 +136,18 @@ Button whichButPressed ()
 
 void Enter_Button ()
 {
+    if (Start == false)
+    {
+        Start = true;
+        return;
+    }
+        
+    if (LoggedIn == false)
+    {
+        Locked ();
+        return;
+    }   
+
     switch (Menu)
     {
     case Menu_Off:
@@ -131,6 +166,12 @@ void Enter_Button ()
 
 void Backward_Button ()
 {
+    if (LoggedIn == false)
+    {
+        Locked ();
+        return;
+    }   
+
     switch (Menu)
     {
     case Menu_Chosen:
@@ -148,6 +189,12 @@ void Backward_Button ()
 
 void Down_Button ()
 {
+    if (LoggedIn == false)
+    {
+        Locked ();
+        return;
+    }   
+
     if (Menu == Menu_Off || Menu == Menu_Chosen)
         return;
 
@@ -173,6 +220,12 @@ void Down_Button ()
 
 void Up_Button ()
 {
+    if (LoggedIn == false)
+    {
+        Locked ();
+        return;
+    }   
+
     if (Menu == Menu_Off || Menu == Menu_Chosen)
         return;
 
@@ -227,19 +280,37 @@ void Home ()
 void Locked ()
 {
     lcd.clear();
-    lcd.setCursor(5,0); 
+    lcd.setCursor(4,0); 
     lcd.print("PLEASE");
-    lcd.setCursor(5,1); 
+    lcd.setCursor(4,1); 
     lcd.print("LOG IN");
 }
 
-void LogIn ()
+void LogIn_Success ()
 {
     lcd.clear();
     lcd.setCursor(5,0); 
-    lcd.print("LOG IN");
-    lcd.setCursor(3,1); 
-    lcd.print("SUCCESSFUL");
+    lcd.print("ACCESS");
+    lcd.setCursor(6,1); 
+    lcd.print("GRANTED");
+}
+
+void LogIn_Fail ()
+{
+    lcd.clear();
+    lcd.setCursor(5,0); 
+    lcd.print("REQUEST");
+    lcd.setCursor(5,1); 
+    lcd.print("DENIED");
+}
+
+void Register_Success ()
+{
+    lcd.clear();
+    lcd.setCursor(1,0); 
+    lcd.print("AUTHORIZATION");
+    lcd.setCursor(4,1); 
+    lcd.print("COMPLETE");
 }
 
 void Menu_Chosen_SendSMS ()
@@ -264,7 +335,7 @@ void Menu_Chosen_Register ()
 {
     lcd.clear();
     lcd.setCursor(4,0); 
-    lcd.print("REGISTER");
+    lcd.print("SCANNING");
     lcd.setCursor(4,1); 
     lcd.print("NEW CARD");
 }
@@ -332,10 +403,14 @@ void Display_Menu_Chosen ()
     {
     case Menu_Lv1_1:
         Menu_Chosen_SendSMS ();
+        prev_state = St_LCD_Button;
+        state = St_SendSMS;
         break;
     
     case Menu_Lv1_2:
         Menu_Chosen_Register ();
+        prev_state = St_LCD_Button;
+        state = St_Register;
         break;
 
     case Menu_Lv1_3:
