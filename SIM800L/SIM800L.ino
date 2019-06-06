@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h>
+//#include <SoftwareSerial.h>
 
 ////Create software serial object to communicate with SIM800L
 //SoftwareSerial mySerial(D1, D2); //SIM800L Tx & Rx is connected to Arduino #3 & #2
