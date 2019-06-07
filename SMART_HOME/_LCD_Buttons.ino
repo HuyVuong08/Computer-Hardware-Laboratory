@@ -181,6 +181,7 @@ void Backward_Button ()
 
     case Menu_LV1:
         Menu = Menu_Off;
+        Home ();
 
     default:
         break;

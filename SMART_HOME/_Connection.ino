@@ -16,7 +16,7 @@ WiFiClient client;
 
 
 // extern variable
-extern int  newly_data;
+extern float  Humidity;
 
 // this variable is for controlling sending data stored in EEPROM
 // this variable reveals that how many numbers in EEPROM are sent

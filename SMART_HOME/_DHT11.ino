@@ -10,10 +10,6 @@ extern float Temperature;
 void DHT11_Setup()
 { 
   dht.begin();
-  Serial.begin(9600);
-  Serial.println("Humidity and temperature \n\n");
-  Serial.println("==========================================");
-  delay(700);
 }
 
 void On_DHT11() 
