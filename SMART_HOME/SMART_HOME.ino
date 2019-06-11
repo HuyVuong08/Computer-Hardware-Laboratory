@@ -12,11 +12,11 @@ volatile int wd_count = 0;
 
 void setup() 
 {
-    Serial.begin(57600);
+    Serial.begin(9600);
   
     Serial.println("Start setting up");
     // set up components
-    RFIF_Setup ();
+    RFID_Setup ();
     Serial.println("RFID set up done");    
 
     SIM800L_Setup ();
@@ -61,37 +61,37 @@ void loop()
     switch (state) {
         case St_Greeting: 
         {
-            Serial.println("on St_Greeting");
+            Serial.println("on Greeting");
             On_Greeting();
             break;
         }
         case St_Unlock: 
         {
-            Serial.println("on St_Unlock");
+            Serial.println("on Unlock");
             On_RFID_LogInAndLogOut ();
             break;
         }
         case St_Register:
         {
-            Serial.println("on St_Register");
+            Serial.println("on Register");
             On_RFID_Register ();
             break;
         }
         case St_ConnectionCheck: 
         {
-            //Serial.println("on St_ConCheck");
+            Serial.println("on ConCheck");
             ConnectionCheck();
             break;
         }
         case St_ReadSensor: 
         {
-            // Serial.println("on ReadSensor");
-            ReadSensor();
+            Serial.println("on ReadSensor");
+            On_DHT11();
             break;
         }
         case St_Wait: 
         {
-            // Serial.println("on Wait");
+            Serial.println("on Wait");
             Wait();
             break;
         }
@@ -103,23 +103,23 @@ void loop()
         }
         case St_Send: 
         {
-            // Serial.println("on Send");
+            Serial.println("on SendServer");
             Send();
             break;
         }
         case St_SaveMem: 
         {
-            // Serial.println("on SaveMem");
+            Serial.println("on SaveMem");
             SaveMem();
             break;
         }
         case St_SendSMS:
         {
-            // Serial.println("on SaveMem");
+            Serial.println("on SendSMS");
             On_SIM800L_SendSMS ();
             break;
         }
     }
 
-    delay(10);
+    delay(1000);
 }

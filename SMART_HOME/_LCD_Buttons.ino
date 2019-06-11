@@ -13,12 +13,13 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
  *CBut là địa chỉ chân nút calibate
  *SpeedPin là địa chỉ của chân điều khiển tốc độ băng chuyền
  */
+int Phone = 0;
 bool Start = false;
 
 
 typedef enum {Bt_NoPress, Bt_1, Bt_2, Bt_3, Bt_4} Button;
-typedef enum {Menu_Off, Menu_LV1, Menu_Chosen} Menu;
-typedef enum {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3} Menu_Lv1;
+enum {Menu_Off, Menu_LV1, Menu_Chosen} Menu;
+enum {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3} Menu_Lv1;
 
 
 extern bool LoggedIn;
@@ -43,13 +44,13 @@ void LCD_Button()
 {
     switch (prev_state)
     {
-    case St_RFID_Unlock:
-        if (Passwordmatched == true && LoggedIn == true)
+    case St_Unlock:
+        if (PasswordMatched == true && LoggedIn == true)
         {
             LogIn_Success ();
             state = St_Wait;
         }
-        else if (Passwordmatched == true && LoggedIn == false)
+        else if (PasswordMatched == true && LoggedIn == false)
         {
             Menu_Chosen_LogOut ();
             state = St_Wait;
@@ -86,13 +87,6 @@ void LCD_Button()
         case Bt_1:
             Serial.println("Enter Button pressed");
             Enter_Button();
-            if (isStarted) {
-                prev_state = state;
-                state = St_Calibrate;
-                sub_state = st_calib_noload;
-                
-                return;
-            }
 
         default:
             break;
@@ -122,11 +116,11 @@ Button whichButPressed ()
 {
     int tmp = analogRead(A0);
 
-    if (tmp >= 415 && tmp <= 490)
+    if (tmp >= 70 && tmp <= 80)
         return Bt_4;
-    if (tmp >= 570 && tmp <= 630)
+    if (tmp >= 100 && tmp <= 110)
         return Bt_3;
-    if (tmp >= 840 && tmp <= 890)
+    if (tmp >= 190 && tmp <= 200)
         return Bt_2;
     if (tmp == 1024)
         return Bt_1;
@@ -150,22 +144,28 @@ void Enter_Button ()
 
     switch (Menu)
     {
-    case Menu_Off:
-        Menu     = Menu_LV1;
-        Menu_Lv1 = Menu_Lv1_1;
-        Display_Menu_Lv1 ();
-        break;
+        case Menu_Off:
+            Menu     = Menu_LV1;
+            Menu_Lv1 = Menu_Lv1_1;
+            Display_Menu_Lv1 ();
+            break;
 
-    case Menu_LV1: 
-        Menu = Menu_Chosen;
+        case Menu_LV1: 
+            Menu = Menu_Chosen;
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
 void Backward_Button ()
 {
+    if (Start == false)
+    {
+        Start = true;
+        return;
+    }
+
     if (LoggedIn == false)
     {
         Locked ();
@@ -174,22 +174,28 @@ void Backward_Button ()
 
     switch (Menu)
     {
-    case Menu_Chosen:
-        Menu = Menu_LV1;
-        Display_Menu_Lv1 ();
-        break;
+        case Menu_Chosen:
+            Menu = Menu_LV1;
+            Display_Menu_Lv1 ();
+            break;
 
-    case Menu_LV1:
-        Menu = Menu_Off;
-        Home ();
+        case Menu_LV1:
+            Menu = Menu_Off;
+            Home ();
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
 void Down_Button ()
 {
+    if (Start == false)
+    {
+        Start = true;
+        return;
+    }
+
     if (LoggedIn == false)
     {
         Locked ();
@@ -201,19 +207,19 @@ void Down_Button ()
 
     switch (Menu_Lv1)
     {
-    case Menu_Lv1_1:
-        Menu_Lv1 == Menu_Lv1_2;
-        break;
-    
-    case Menu_Lv1_2:
-        Menu_Lv1 == Menu_Lv1_3;
-        break;
-    
-    case Menu_Lv1_3:
-        Menu_Lv1 == Menu_Lv1_1;
+        case Menu_Lv1_1:
+            Menu_Lv1 == Menu_Lv1_2;
+            break;
+        
+        case Menu_Lv1_2:
+            Menu_Lv1 == Menu_Lv1_3;
+            break;
+        
+        case Menu_Lv1_3:
+            Menu_Lv1 == Menu_Lv1_1;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     Display_Menu_Lv1 ();
@@ -221,6 +227,12 @@ void Down_Button ()
 
 void Up_Button ()
 {
+    if (Start == false)
+    {
+        Start = true;
+        return;
+    }
+
     if (LoggedIn == false)
     {
         Locked ();
@@ -232,19 +244,19 @@ void Up_Button ()
 
     switch (Menu_Lv1)
     {
-    case Menu_Lv1_3:
-        Menu_Lv1 == Menu_Lv1_2;
-        break;
-    
-    case Menu_Lv1_2:
-        Menu_Lv1 == Menu_Lv1_1;
-        break;
+        case Menu_Lv1_3:
+            Menu_Lv1 == Menu_Lv1_2;
+            break;
+        
+        case Menu_Lv1_2:
+            Menu_Lv1 == Menu_Lv1_1;
+            break;
 
-    case Menu_Lv1_1:
-        Menu_Lv1 == Menu_Lv1_3;
+        case Menu_Lv1_1:
+            Menu_Lv1 == Menu_Lv1_3;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     Display_Menu_Lv1 ();
@@ -379,19 +391,19 @@ void Display_Menu_Lv1 ()
     
     switch (Menu_Lv1)
     {
-    case Menu_Lv1_1:
-        Menu_Lv1_SendSMS ();
-        break;
-    
-    case Menu_Lv1_2:
-        Menu_Lv1_Register ();
-        break;
+        case Menu_Lv1_1:
+            Menu_Lv1_SendSMS ();
+            break;
+        
+        case Menu_Lv1_2:
+            Menu_Lv1_Register ();
+            break;
 
-    case Menu_Lv1_3:
-        Menu_Lv1_LogOut ();
+        case Menu_Lv1_3:
+            Menu_Lv1_LogOut ();
 
-    default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -401,23 +413,25 @@ void Display_Menu_Chosen ()
         return;
 
     switch (Menu_Lv1)
-    {
-    case Menu_Lv1_1:
-        Menu_Chosen_SendSMS ();
-        prev_state = St_LCD_Button;
-        state = St_SendSMS;
-        break;
-    
-    case Menu_Lv1_2:
-        Menu_Chosen_Register ();
-        prev_state = St_LCD_Button;
-        state = St_Register;
-        break;
+    { 
+        case Menu_Lv1_1:
+        {
+            Menu_Chosen_SendSMS ();
+            prev_state = St_LCD_Button;
+            state = St_SendSMS;
+            break;
+        }
+        case Menu_Lv1_2:
+        {
+            Menu_Chosen_Register ();
+            prev_state = St_LCD_Button;
+            state = St_Register;
+            break;
+        }
+        case Menu_Lv1_3:
+            Menu_Chosen_LogOut ();
 
-    case Menu_Lv1_3:
-        Menu_Chosen_LogOut ();
-
-    default:
-        break;
+        default:
+            break;
     }
 }

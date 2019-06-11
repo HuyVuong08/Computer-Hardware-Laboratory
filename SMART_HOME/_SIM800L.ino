@@ -1,72 +1,32 @@
-#include <Sim800l.h>
+#include <SoftwareSerial.h>
 
-#include <Bounce2.h>
+extern float Humidity;
+extern enum State    state, prev_state;
+extern enum SubState sub_state;
 
-#include <SoftwareSerial.h> //is necesary for the library!!
-
-Sim800l Sim800l; //to declare the library
-
-char* closedText;
-
-char * openText;
-
-char* number;
-
-bool error; //to catch the response of sendSms
-
-#define SWITCH_PIN 3 // Connect switch pin here
-
-Bounce debouncer = Bounce();
-
-int currentState = -1;
-
-int lastState = -1;
-
-void setup(){
-    SIM800L_Setup ();
-}
-
-void loop(){
-    On_SIM80L ();
-}
+SoftwareSerial sim(D9, D10);
 
 void SIM800L_Setup ()
 {
-    Serial.begin(9600);
-
-    Sim800l.begin(); // initializate the library.
-
-    closedText="Door has been closed"; //text for the message.
-    openText="Door has been opened"; //text for the message.
-
-    number="xxxxxxxxxx"; //sms phone number
-
-    pinMode(SWITCH_PIN, INPUT_PULLUP);
-
-    debouncer.attach(SWITCH_PIN);
-    debouncer.interval(100);
-
-    //digitalWrite(BUTTON_PIN, HIGH);
+    sim.begin(9600);
 }
 
-void On_SIM80L ()
+void On_SIM800L_SendSMS ()
 {
-    debouncer.update();
+    sim.print("AT+CMGF=1\r\n");
+    delay(100);
 
-    currentState = debouncer.read();
+    sim.print("AT+CMGS=\"084933792267\"\r\n");
+    delay(100);
 
-    if (currentState != lastState)
-    {
-        if(currentState == HIGH)
-        {
-            Serial.println("open");
-            error=Sim800l.sendSms(number,openText);
-        }
-        else
-        {
-            error=Sim800l.sendSms(number,closedText);
-            Serial.println("closed");
-        }
-        lastState = currentState;
-    }
+    String Humidity_string = String(Humidity);
+    Serial.print(Humidity_string);
+    sim.print(Humidity_string+"\r\n");
+
+    delay(100);
+    sim.write(26);
+    delay(100);
+
+    prev_state = St_SendSMS;
+    state = St_Wait;
 }

@@ -36,9 +36,8 @@ extern bool PasswordMatched;
 extern enum State state, prev_state;
 
 
-void On_RFID_Setup ()
+void RFID_Setup ()
 {
-    Serial.begin(9600);        // Initialize serial communications with the PC
     SPI.begin();               // Init SPI bus
     mfrc522.PCD_Init();        // Init MFRC522 card
 }
@@ -50,14 +49,14 @@ void On_RFID_Register ()
     for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 
     // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-    if ( ! mfrc522.PICC_IsNewCardPresent()) 
+    if ( ! mfrc522.PICC_IsNewCardPresent()) {
         return;
-    
+    }
 
     // Select one of the cards
-    if ( ! mfrc522.PICC_ReadCardSerial()) 
+    if ( ! mfrc522.PICC_ReadCardSerial()) {
         return;
-    
+    }
 
     Serial.print(F("Card UID:"));    //Dump UID
     for (byte i = 0; i < mfrc522.uid.size; i++) 
@@ -65,25 +64,24 @@ void On_RFID_Register ()
         Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
         Serial.print(mfrc522.uid.uidByte[i], HEX);
     }
-
     Serial.print(F(" PICC type: "));   // Dump PICC type
     MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
     Serial.println(mfrc522.PICC_GetTypeName(piccType));
 
-
+    
     MFRC522::StatusCode status;
+    byte len;
 
     /*
-    byte len;
-    Serial.setTimeout(20000L) ;     // wait until 20 seconds for input from serial
-    // Ask personal data: Family name
-    Serial.println(F("Type Family name, ending with #"));
-    len = Serial.readBytesUntil('#', (char *) buffer, 30) ; // read family name from serial
-    for (byte i = len; i < 30; i++) buffer[i] = ' ';     // pad with spaces
+      Serial.setTimeout(20000L) ;     // wait until 20 seconds for input from serial
+      // Ask personal data: Family name
+      Serial.println(F("Type Family name, ending with #"));
+      len = Serial.readBytesUntil('#', (char *) buffer, 30) ; // read family name from serial
+      for (byte i = len; i < 30; i++) buffer[i] = ' ';     // pad with spaces
     */
 
     //PasswordBlock = 1;
-    Serial.println(F("Authenticating using key A..."));
+    //Serial.println(F("Authenticating using key A..."));
     status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, PasswordBlock, &key, &(mfrc522.uid));
     if (status != MFRC522::STATUS_OK) 
     {
@@ -107,12 +105,11 @@ void On_RFID_Register ()
     mfrc522.PICC_HaltA(); // Halt PICC
     mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
 
-    prev_state = St_Register;
-    state = St_LCD_Button;
 }
 
 void On_RFID_LogInAndLogOut () 
 {
+
     // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
     MFRC522::MIFARE_Key key;
     for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
@@ -121,44 +118,47 @@ void On_RFID_LogInAndLogOut ()
     byte len;
     MFRC522::StatusCode status;
 
+    //-------------------------------------------
 
     // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-    if ( ! mfrc522.PICC_IsNewCardPresent()) 
+    if ( ! mfrc522.PICC_IsNewCardPresent()) {
+        Serial.println ("No Card");
         return;
-    
+    }
 
     // Select one of the cards
-    if ( ! mfrc522.PICC_ReadCardSerial()) 
+    if ( ! mfrc522.PICC_ReadCardSerial()) {
         return;
-    
+    }
 
     Serial.println(F("**Card Detected:**"));
 
+    //-------------------------------------------
 
     mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
 
     //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
 
-
+    
+    //---------------------------------------- GET LAST NAME
 
     byte buffer[18];
     //PasswordBlock = 1;
 
     status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid)); //line 834
-    if (status != MFRC522::STATUS_OK) 
-    {
+    if (status != MFRC522::STATUS_OK) {
         Serial.print(F("Authentication failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
         return;
     }
 
     status = mfrc522.MIFARE_Read(PasswordBlock, buffer, &len);
-    if (status != MFRC522::STATUS_OK) 
-    {
+    if (status != MFRC522::STATUS_OK) {
         Serial.print(F("Reading failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
         return;
     }
+
 
     PasswordMatched = true;
 
@@ -174,6 +174,7 @@ void On_RFID_LogInAndLogOut ()
     if (PasswordMatched)
         LoggedIn = !LoggedIn;
 
+    Serial.println (LoggedIn);
 
     Serial.println(F("\n**End Reading**\n"));
 
@@ -182,7 +183,5 @@ void On_RFID_LogInAndLogOut ()
 
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
-
-    prev_state = St_Unlock;
-    state = St_LCD_Button;
 }
+//*****************************************************************************************//

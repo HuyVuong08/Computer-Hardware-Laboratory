@@ -21,11 +21,11 @@ const int   EEPROM_StartData    = 6;                     // the position of the 
 
 
 //extern variables
-extern int  newly_data;
+extern float  Humidity;
 
-void        EEPROM_setup() {
+void        EEPROM_setup()
+{
     EEPROM.begin(400);
-
 }
 /**
  *  Write calibrated index to EEPROM
@@ -87,7 +87,7 @@ void        SaveMem() {
     // write newly data from LoadCell
     int pos = getTail();                        // get position of byte to write
 
-    byte* p = (byte*) &newly_data;
+    byte* p = (byte*) &Humidity;
 
     EEPROM.write(pos, *p);
     EEPROM.write(pos + 1, *(p + 1));
