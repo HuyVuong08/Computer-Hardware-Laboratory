@@ -17,13 +17,13 @@
  * PCD (Proximity Coupling Device): NXP MFRC522 Contactless Reader IC
  * PICC (Proximity Integrated Circuit Card): A card or tag using the ISO 14443A interface, eg Mifare or NTAG203.
  * The reader can be found on eBay for around 5 dollars. Search for "mf-rc522" on ebay.com. 
-*/
+ */
 
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define RST_PIN D3          // Configurable, see typical pin layout above
-#define SS_PIN  D4          // Configurable, see typical pin layout above
+#define RST_PIN         D0          // Configurable, see typical pin layout above
+#define SS_PIN          D3          // Configurable, see typical pin layout above
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
@@ -33,11 +33,12 @@ byte PasswordBlock = 1;
 
 extern bool LoggedIn;
 extern bool PasswordMatched;
-extern enum State state, prev_state;
+
 
 
 void RFID_Setup ()
 {
+    Serial.begin(9600);        // Initialize serial communications with the PC
     SPI.begin();               // Init SPI bus
     mfrc522.PCD_Init();        // Init MFRC522 card
 }
@@ -49,12 +50,14 @@ void On_RFID_Register ()
     for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 
     // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-    if ( ! mfrc522.PICC_IsNewCardPresent()) {
+    if ( ! mfrc522.PICC_IsNewCardPresent()) 
+    {
         return;
     }
 
     // Select one of the cards
-    if ( ! mfrc522.PICC_ReadCardSerial()) {
+    if ( ! mfrc522.PICC_ReadCardSerial()) 
+    {
         return;
     }
 
@@ -80,7 +83,7 @@ void On_RFID_Register ()
       for (byte i = len; i < 30; i++) buffer[i] = ' ';     // pad with spaces
     */
 
-    //PasswordBlock = 1;
+    //block = 1;
     //Serial.println(F("Authenticating using key A..."));
     status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, PasswordBlock, &key, &(mfrc522.uid));
     if (status != MFRC522::STATUS_OK) 
@@ -91,7 +94,7 @@ void On_RFID_Register ()
     }
     else Serial.println(F("PCD_Authenticate() success: "));
 
-    // Write PasswordBlock
+    // Write block
     status = mfrc522.MIFARE_Write(PasswordBlock, Password, 16);
     if (status != MFRC522::STATUS_OK) 
     {
@@ -107,7 +110,7 @@ void On_RFID_Register ()
 
 }
 
-void On_RFID_LogInAndLogOut () 
+void On_RFID_LogIn () 
 {
 
     // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
@@ -121,13 +124,14 @@ void On_RFID_LogInAndLogOut ()
     //-------------------------------------------
 
     // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-    if ( ! mfrc522.PICC_IsNewCardPresent()) {
-        Serial.println ("No Card");
+    if ( ! mfrc522.PICC_IsNewCardPresent()) 
+    {
         return;
     }
 
     // Select one of the cards
-    if ( ! mfrc522.PICC_ReadCardSerial()) {
+    if ( ! mfrc522.PICC_ReadCardSerial()) 
+    {
         return;
     }
 
@@ -143,20 +147,22 @@ void On_RFID_LogInAndLogOut ()
     //---------------------------------------- GET LAST NAME
 
     byte buffer[18];
-    //PasswordBlock = 1;
+    //block = 1;
 
     status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid)); //line 834
-    if (status != MFRC522::STATUS_OK) {
+    if (status != MFRC522::STATUS_OK) 
+    {
         Serial.print(F("Authentication failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
         return;
     }
 
     status = mfrc522.MIFARE_Read(PasswordBlock, buffer, &len);
-    if (status != MFRC522::STATUS_OK) {
-        Serial.print(F("Reading failed: "));
-        Serial.println(mfrc522.GetStatusCodeName(status));
-        return;
+    if (status != MFRC522::STATUS_OK) 
+    {
+      Serial.print(F("Reading failed: "));
+      Serial.println(mfrc522.GetStatusCodeName(status));
+      return;
     }
 
 
@@ -175,6 +181,9 @@ void On_RFID_LogInAndLogOut ()
         LoggedIn = !LoggedIn;
 
     Serial.println (LoggedIn);
+
+
+    //----------------------------------------
 
     Serial.println(F("\n**End Reading**\n"));
 

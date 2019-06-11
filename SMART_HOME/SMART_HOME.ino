@@ -9,6 +9,7 @@
 Ticker sTick;
 
 volatile int wd_count = 0;
+extern bool LoggedIn;
 
 void setup() 
 {
@@ -68,7 +69,8 @@ void loop()
         case St_Unlock: 
         {
             Serial.println("on Unlock");
-            On_RFID_LogInAndLogOut ();
+            On_RFID_LogIn ();
+            Serial.println (LoggedIn);
             break;
         }
         case St_Register:
