@@ -245,7 +245,7 @@ void Down_Button ()
             break;
 
         case Menu_Lv1_3:
-            Menu_Lv1 = Menu_Lv1_3;
+            Menu_Lv1 = Menu_Lv1_1;
 
         default:
             break;
