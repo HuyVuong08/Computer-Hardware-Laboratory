@@ -13,13 +13,18 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
  *CBut là địa chỉ chân nút calibate
  *SpeedPin là địa chỉ của chân điều khiển tốc độ băng chuyền
  */
-int Phone = 0;
+int prev = 0;
+String Phone = "084933792267";
 bool Start = false;
 
 
-typedef enum {Bt_NoPress, Bt_1, Bt_2, Bt_3, Bt_4} Button;
-enum {Menu_Off, Menu_LV1, Menu_Chosen} Menu;
-enum {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3} Menu_Lv1;
+typedef enum {Bt_NoPress, Bt_Enter, Bt_Down, Bt_Backward, Bt_Up, Bt_Dublicate} Button;
+enum Menu {Menu_Off, Menu_LV1, Menu_Chosen};
+enum Menu_Lv1 {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3};
+
+
+enum Menu Menu = Menu_Off;
+enum Menu_Lv1 Menu_Lv1 = Menu_Lv1_1;
 
 
 extern bool LoggedIn;
@@ -46,22 +51,24 @@ void LCD_Button()
     {
     case St_Unlock:
         if (PasswordMatched == true && LoggedIn == true)
-        {
             LogIn_Success ();
-            state = St_Wait;
-        }
         else if (PasswordMatched == true && LoggedIn == false)
-        {
             Menu_Chosen_LogOut ();
-            state = St_Wait;
-        }
-        else    
-        {   
+        else      
             LogIn_Fail ();
-            state = St_Wait;
-        }
-        return;
-    
+        Menu = Menu_Off;
+        break;
+
+    case St_Register:
+        Register_Success ();
+        Menu = Menu_Off;
+        break;
+
+    case St_SendSMS:
+        SMS_Sent ();
+        Menu = Menu_Off;
+        break;
+
     default:
         break;
     }
@@ -69,30 +76,32 @@ void LCD_Button()
 
     switch (whichButPressed())
     {
-        case Bt_4:
-            Serial.println("Up Arrow pressed");
+        case Bt_Up:
+            Serial.println("Bt_Up Arrow pressed");
             Up_Button ();
             break;
 
-        case Bt_3:
-            Serial.println("Backward Button pressed");
+        case Bt_Backward:
+            Serial.println("Bt_Backward Button pressed");
             Backward_Button ();
             break;
 
-        case Bt_2:
-            Serial.println("Down Arrow pressed");
+        case Bt_Down:
+            Serial.println("Bt_Down Arrow pressed");
             Down_Button ();
             break;
 
-        case Bt_1:
-            Serial.println("Enter Button pressed");
+        case Bt_Enter:
+            Serial.println("Bt_Enter Button pressed");
             Enter_Button();
 
         default:
             break;
     }
 
-    if (Start)
+    if (Start == false)
+        state = St_LCD_Button;
+    else if (Menu == Menu_Off)
         state = St_Wait;
 }
 
@@ -115,16 +124,34 @@ void LCD_Button()
 Button whichButPressed ()
 {
     int tmp = analogRead(A0);
-
+    if (prev > 40)
+    {
+        prev = tmp;
+        return Bt_Dublicate;
+    }
+ 
     if (tmp >= 70 && tmp <= 80)
-        return Bt_4;
+    {
+        prev = tmp;
+        return Bt_Up;
+    }
     if (tmp >= 100 && tmp <= 110)
-        return Bt_3;
+    {        
+        prev = tmp;
+        return Bt_Backward;
+    } 
     if (tmp >= 190 && tmp <= 200)
-        return Bt_2;
+    {       
+        prev = tmp;
+        return Bt_Down;  
+    }    
     if (tmp == 1024)
-        return Bt_1;
+    {        
+        prev = tmp;
+        return Bt_Enter;
+    }
 
+    prev = tmp;
     return Bt_NoPress;
 }
 
@@ -134,9 +161,8 @@ void Enter_Button ()
     {
         Start = true;
         return;
-    }
-        
-    if (LoggedIn == false)
+    }    
+    else if (LoggedIn == false)
     {
         Locked ();
         return;
@@ -145,14 +171,17 @@ void Enter_Button ()
     switch (Menu)
     {
         case Menu_Off:
+        {
             Menu     = Menu_LV1;
             Menu_Lv1 = Menu_Lv1_1;
             Display_Menu_Lv1 ();
             break;
-
+        }
         case Menu_LV1: 
+        {
             Menu = Menu_Chosen;
-
+            Display_Menu_Chosen ();
+        }
         default:
             break;
     }
@@ -202,21 +231,21 @@ void Down_Button ()
         return;
     }   
 
-    if (Menu == Menu_Off || Menu == Menu_Chosen)
+    if (Menu != Menu_LV1)
         return;
 
     switch (Menu_Lv1)
     {
         case Menu_Lv1_1:
-            Menu_Lv1 == Menu_Lv1_2;
+            Menu_Lv1 = Menu_Lv1_2;
             break;
         
         case Menu_Lv1_2:
-            Menu_Lv1 == Menu_Lv1_3;
+            Menu_Lv1 = Menu_Lv1_3;
             break;
-        
+
         case Menu_Lv1_3:
-            Menu_Lv1 == Menu_Lv1_1;
+            Menu_Lv1 = Menu_Lv1_3;
 
         default:
             break;
@@ -245,15 +274,15 @@ void Up_Button ()
     switch (Menu_Lv1)
     {
         case Menu_Lv1_3:
-            Menu_Lv1 == Menu_Lv1_2;
+            Menu_Lv1 = Menu_Lv1_2;       
             break;
         
         case Menu_Lv1_2:
-            Menu_Lv1 == Menu_Lv1_1;
+            Menu_Lv1 = Menu_Lv1_1;
             break;
 
         case Menu_Lv1_1:
-            Menu_Lv1 == Menu_Lv1_3;
+            Menu_Lv1 = Menu_Lv1_3;
 
         default:
             break;
@@ -279,15 +308,20 @@ void On_Greeting() {
 void Home ()
 {
     lcd.clear();
+
+    lcd.setCursor(0,0); 
+    lcd.print("TEM: ");
+    lcd.setCursor(5,0); 
+    lcd.print(Temperature);
+    lcd.setCursor(10,0); 
+    lcd.print('C');
+
     lcd.setCursor(0,1); 
     lcd.print("HUM: ");
     lcd.setCursor(5,1); 
     lcd.print(Humidity);
-
-    lcd.setCursor(7,1); 
-    lcd.print("TEM: ");
-    lcd.setCursor(12,1); 
-    lcd.print(Temperature);
+    lcd.setCursor(10,1); 
+    lcd.print('%');
 }
 
 void Locked ()
@@ -304,7 +338,7 @@ void LogIn_Success ()
     lcd.clear();
     lcd.setCursor(5,0); 
     lcd.print("ACCESS");
-    lcd.setCursor(6,1); 
+    lcd.setCursor(5,1); 
     lcd.print("GRANTED");
 }
 
@@ -326,11 +360,20 @@ void Register_Success ()
     lcd.print("COMPLETE");
 }
 
-void Menu_Chosen_SendSMS ()
+void SMS_Sent ()
 {
     lcd.clear();
     lcd.setCursor(2,0); 
-    lcd.print("SEND SMS TO");
+    lcd.print("SMS SENT TO");
+    lcd.setCursor(2,1); 
+    lcd.print(Phone);
+}
+
+void Menu_Chosen_SendSMS ()
+{
+    lcd.clear();
+    lcd.setCursor(3,0); 
+    lcd.print("SENDING TO");
     lcd.setCursor(2,1); 
     lcd.print(Phone);
 }
@@ -430,6 +473,8 @@ void Display_Menu_Chosen ()
         }
         case Menu_Lv1_3:
             Menu_Chosen_LogOut ();
+            LoggedIn = false;
+            state = St_Unlock;
 
         default:
             break;

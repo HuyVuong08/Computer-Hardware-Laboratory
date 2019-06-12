@@ -4,8 +4,8 @@
 #include <ESP8266HTTPClient.h>
 
 
-const char *ssid             = "AndroidAP";    
-const char *password         = "nguyen12185";
+const char *ssid             = "Family";    
+const char *password         = "khongcowifi";
 
 const char *ThingSpeakServer = "api.thingspeak.com";
 const int  ID                = 797869;                            // ThingSpeak Channel ID
@@ -17,6 +17,7 @@ WiFiClient client;
 
 // extern variable
 extern float  Humidity;
+extern float  Temperature;
 
 // this variable is for controlling sending data stored in EEPROM
 // this variable reveals that how many numbers in EEPROM are sent
@@ -53,7 +54,8 @@ void Send()
                 if (client.connect(ThingSpeakServer,80)) 
                 {
                     Serial.println("Send data from EEPROM...");
-                    sendToThingSpeak(tmp);
+                    sendTemperatureToThingSpeak ();
+                    sendHumidityToThingSpeak ();
 
                     client.stop();
 
@@ -83,7 +85,9 @@ void Send()
         case st_send_done: 
         {
             // send Humidity data
-            sendToThingSpeak(Humidity);
+            sendTemperatureToThingSpeak ();
+            sendHumidityToThingSpeak ();
+            
             client.stop();
             
             Serial.print("Speed = "); Serial.println((int)Speed);
@@ -130,11 +134,11 @@ void    ConnectionCheck()
 /**
  * 
  */
-void    sendToThingSpeak(int data) 
+void    sendHumidityToThingSpeak ()
 {
     String postStr = writeAPIKey;
-    postStr +="&field1=";
-    postStr += String(data);
+    postStr +="&field2=";
+    postStr += String(Humidity);
     postStr += "\r\n\r\n";
         
     client.print("POST /update HTTP/1.1\n");
@@ -147,5 +151,25 @@ void    sendToThingSpeak(int data)
     client.print("\n\n");
     client.print(postStr);
 
-    Serial.print("Sent to server: "); Serial.println(data);
+    Serial.print("Sent to server: "); Serial.println(Humidity);
+}
+
+void    sendTemperatureToThingSpeak ()
+{
+    String postStr = writeAPIKey;
+    postStr +="&field1=";
+    postStr += String(Temperature);
+    postStr += "\r\n\r\n";
+        
+    client.print("POST /update HTTP/1.1\n");
+    client.print("Host: api.thingspeak.com\n");
+    client.print("Connection: close\n");
+    client.print("X-THINGSPEAKAPIKEY: " + writeAPIKey + "\n");
+    client.print("Content-Type: application/x-www-form-urlencoded\n");
+    client.print("Content-Length: ");
+    client.print(postStr.length());
+    client.print("\n\n");
+    client.print(postStr);
+
+    Serial.print("Sent to server: "); Serial.println(Temperature);
 }

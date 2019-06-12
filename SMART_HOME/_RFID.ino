@@ -38,7 +38,6 @@ extern bool PasswordMatched;
 
 void RFID_Setup ()
 {
-    Serial.begin(9600);        // Initialize serial communications with the PC
     SPI.begin();               // Init SPI bus
     mfrc522.PCD_Init();        // Init MFRC522 card
 }

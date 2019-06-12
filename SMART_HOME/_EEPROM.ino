@@ -21,7 +21,7 @@ const int   EEPROM_StartData    = 6;                     // the position of the 
 
 
 //extern variables
-extern float  Humidity;
+extern float  Temperature;
 
 void        EEPROM_setup()
 {
@@ -87,7 +87,7 @@ void        SaveMem() {
     // write newly data from LoadCell
     int pos = getTail();                        // get position of byte to write
 
-    byte* p = (byte*) &Humidity;
+    byte* p = (byte*) &Temperature;
 
     EEPROM.write(pos, *p);
     EEPROM.write(pos + 1, *(p + 1));

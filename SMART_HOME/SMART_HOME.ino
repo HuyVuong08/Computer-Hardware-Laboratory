@@ -9,7 +9,6 @@
 Ticker sTick;
 
 volatile int wd_count = 0;
-extern bool LoggedIn;
 
 void setup() 
 {
@@ -70,13 +69,20 @@ void loop()
         {
             Serial.println("on Unlock");
             On_RFID_LogIn ();
-            Serial.println (LoggedIn);
+            delay (5000);
+            LoggedIn = true;
+            PasswordMatched = true;
+            prev_state = St_Unlock;
+            state = St_LCD_Button;
             break;
         }
         case St_Register:
         {
             Serial.println("on Register");
             On_RFID_Register ();
+            delay (5000);
+            prev_state = St_Register;
+            state = St_LCD_Button;
             break;
         }
         case St_ConnectionCheck: 
@@ -119,9 +125,12 @@ void loop()
         {
             Serial.println("on SendSMS");
             On_SIM800L_SendSMS ();
+            delay (5000);
+            prev_state = St_SendSMS;
+            state = St_LCD_Button;
             break;
         }
     }
 
-    delay(1000);
+    delay(10);
 }
