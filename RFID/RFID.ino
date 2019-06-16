@@ -31,6 +31,7 @@ byte Password[18] = "123";
 byte PasswordBlock = 1;
 
 
+int NumberOfCard = 1;
 bool LoggedIn;
 bool PasswordMatched;
 
