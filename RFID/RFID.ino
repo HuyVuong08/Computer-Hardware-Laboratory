@@ -122,7 +122,16 @@ void On_RFID_Register ()
 
 void On_RFID_LogIn () 
 {
+    Verify ();
 
+    if (PasswordMatched)
+        LoggedIn = !LoggedIn;
+
+    Serial.println ("LoggedIn true");
+}
+
+void Verify ()
+{
     // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
     MFRC522::MIFARE_Key key;
     for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
@@ -186,13 +195,7 @@ void On_RFID_LogIn ()
             break;
         }
     }
-
-    if (PasswordMatched)
-        LoggedIn = !LoggedIn;
-
-    Serial.println (LoggedIn);
-
-
+    
     //----------------------------------------
 
     Serial.println(F("\n**End Reading**\n"));
@@ -203,4 +206,5 @@ void On_RFID_LogIn ()
     mfrc522.PICC_HaltA();
     mfrc522.PCD_StopCrypto1();
 }
+
 //*****************************************************************************************//
