@@ -27,6 +27,7 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
+byte Eraser[18] = "0000000000000000";
 byte Password[18] = "123";
 byte PasswordBlock = 1;
 
@@ -103,21 +104,48 @@ void On_RFID_Register ()
     }
     else Serial.println(F("PCD_Authenticate() success: "));
 
-    // Write block
-    status = mfrc522.MIFARE_Write(PasswordBlock, Password, 16);
+    //Card Verify
+    status = mfrc522.MIFARE_Read(PasswordBlock, buffer, &len);
     if (status != MFRC522::STATUS_OK) 
     {
-        Serial.print(F("MIFARE_Write() failed: "));
+        Serial.print(F("Reading failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
         return;
     }
-    else Serial.println(F("MIFARE_Write() success: "));
+    else Serial.println(F("MIFARE_Read() success: "));
+    
+    
+    PasswordMatched = true;
 
-    Serial.println(F("\n**End Writing**\n"));
+    for (uint8_t i = 0; i < 16; i++) 
+    {
+        if (buffer[i] != Password[i])
+        {
+            PasswordMatched = false;
+            break;
+        }
+    }
+
+    if (PasswordMatched)
+    {
+        Serial.println ("Authenticated Card");
+    }
+    else
+    {   // Write block
+        status = mfrc522.MIFARE_Write(PasswordBlock, Password, 16);
+        if (status != MFRC522::STATUS_OK) 
+        {
+            Serial.print(F("MIFARE_Write() failed: "));
+            Serial.println(mfrc522.GetStatusCodeName(status));
+            return;
+        }
+        else Serial.println(F("MIFARE_Write() success: "));
+        NumberOfCard ++;
+        Serial.println(F("\n**End Writing**\n"));
+    }
 
     mfrc522.PICC_HaltA(); // Halt PICC
     mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
-
 }
 
 void On_RFID_LogIn () 
@@ -173,11 +201,6 @@ void On_RFID_LogIn ()
         return;
     }
     else Serial.println(F("MIFARE_Read() success: "));
-
-    Serial.println(F("\n**End Reading**\n"));
-
-    mfrc522.PICC_HaltA(); // Halt PICC
-    mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
     
     
     PasswordMatched = true;
@@ -195,4 +218,104 @@ void On_RFID_LogIn ()
         LoggedIn = !LoggedIn;
 
     Serial.println (LoggedIn);
+
+    Serial.println(F("\n**End Reading**\n"));
+
+    mfrc522.PICC_HaltA(); // Halt PICC
+    mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
+}
+
+void On_RFID_CardDelete () 
+{
+    // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
+    MFRC522::MIFARE_Key key;
+    for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+
+    // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
+    if ( ! mfrc522.PICC_IsNewCardPresent()) 
+    {
+        return;
+    }
+
+    // Select one of the cards
+    if ( ! mfrc522.PICC_ReadCardSerial()) 
+    {
+        return;
+    }
+
+    Serial.println(F("**Card Detected:**"));
+
+    //-------------------------------------------
+
+    mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
+
+    //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
+
+    //---------------------------------------- GET Password
+
+    //some variables we need
+    byte len;
+    MFRC522::StatusCode status;
+
+
+    byte buffer[18];
+    //block = 1;
+
+    status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid)); //line 834
+    if (status != MFRC522::STATUS_OK) 
+    {
+        Serial.print(F("Authentication failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        return;
+    }
+    else Serial.println(F("PCD_Authenticate() success: "));
+
+    status = mfrc522.MIFARE_Read(PasswordBlock, buffer, &len);
+    if (status != MFRC522::STATUS_OK) 
+    {
+        Serial.print(F("Reading failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        return;
+    }
+    else Serial.println(F("MIFARE_Read() success: "));
+    
+    
+    PasswordMatched = true;
+
+    for (uint8_t i = 0; i < 16; i++) 
+    {
+        if (buffer[i] != Password[i])
+        {
+            PasswordMatched = false;
+            break;
+        }
+    }
+
+    if (PasswordMatched)
+    {   
+        if (NumberOfCard > 1)
+        {
+            // Write block
+            status = mfrc522.MIFARE_Write(PasswordBlock, Eraser, 16);
+            if (status != MFRC522::STATUS_OK) 
+            {
+                Serial.print(F("MIFARE_Write() failed: "));
+                Serial.println(mfrc522.GetStatusCodeName(status));
+                return;
+            }
+            else Serial.println(F("MIFARE_Write() success: "));
+            NumberOfCard --;
+            Serial.println(F("\n**End Erasing**\n"));
+        }
+        else 
+            Serial.println ("Last Card");
+    }
+    else
+    {
+        Serial.println ("Not Authenticated Card");
+    }
+
+
+    mfrc522.PICC_HaltA(); // Halt PICC
+    mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
 }
