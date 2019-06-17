@@ -123,11 +123,19 @@ void On_RFID_Register ()
 void On_RFID_LogIn () 
 {
     Verify ();
+<<<<<<< HEAD
 
     if (PasswordMatched)
         LoggedIn = !LoggedIn;
 
     Serial.println (LoggedIn);
+=======
+
+    if (PasswordMatched)
+        LoggedIn = !LoggedIn;
+
+    Serial.println ("LoggedIn true");
+>>>>>>> 9e1ec2281b53bc0dab2fb7a59863e665dd4a629c
 }
 
 void Verify ()
@@ -202,5 +210,19 @@ void Verify ()
             break;
         }
     }
+<<<<<<< HEAD
+=======
+    
+    //----------------------------------------
+
+    Serial.println(F("\n**End Reading**\n"));
+
+    delay(1000); //change value if you want to read cards faster
+
+
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
+>>>>>>> 9e1ec2281b53bc0dab2fb7a59863e665dd4a629c
 }
+
 //*****************************************************************************************//
