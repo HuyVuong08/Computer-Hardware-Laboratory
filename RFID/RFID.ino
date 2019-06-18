@@ -27,9 +27,9 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
-byte Eraser[18] = "0000000000000000";
-byte Password[18] = "123";
-byte PasswordBlock = 1;
+byte Eraser[18]     = "0000000000000000";
+byte Password[18]   = "123456789";
+byte PasswordBlock  = 1;
 
 
 int NumberOfCard = 1;
