@@ -43,7 +43,7 @@ void setup ()
 
 void loop ()
 {
-  On_RFID_LogIn();
+  On_RFID_Verify();
 }
 
 //*****************************************************************************************//
@@ -55,7 +55,7 @@ void RFID_setup()
 }
 
 //*****************************************************************************************//
-void On_RFID_LogIn() 
+void On_RFID_Verify() 
 {
 
   // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
