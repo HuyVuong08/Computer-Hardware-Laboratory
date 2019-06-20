@@ -31,9 +31,9 @@ int NumberOfCard     = 1;
 byte Buffer[18];
 byte BufferSize      = 18;
 
-byte Password[16]    = "12345";
+byte Password[18]    = "12345";
 byte Eraser[16]      = "000000000000000";
-byte PasswordBlock   = 1;
+byte PasswordBlock   = 2;
 bool PasswordMatched = true;
 
 
@@ -194,7 +194,7 @@ void On_RFID_Register ()
 
   if (PasswordMatched)
   {
-    Serial.println ("Password Matched");
+    Serial.println ("Authenticated Card");
     Serial.println ("Card Aproval Canceled");
     Serial.print (F("NumberOfCard: "));
     Serial.print (NumberOfCard);
@@ -222,11 +222,12 @@ void On_RFID_Register ()
 
     Serial.println(F("\n**End Writing**"));
   }  
+  
   mfrc522.PICC_HaltA();       // Halt PICC
   mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
 }
 
-void On_RFID_CardDisprove () 
+void On_RFID_Disprove () 
 {
 
   // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
