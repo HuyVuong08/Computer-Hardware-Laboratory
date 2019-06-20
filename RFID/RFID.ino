@@ -34,304 +34,307 @@ byte BufferSize      = 18;
 byte Password[18]    = "12345";
 byte Eraser[16]      = "000000000000000";
 byte PasswordBlock   = 2;
+bool LoggedIn = false;
 bool PasswordMatched = true;
 
 
 void setup ()
 {
-  RFID_setup ();
+    RFID_setup ();
 }   
 
 void loop ()
 {
-  On_RFID_Register ();
+    On_RFID_Verify ();
 }
 
 //*****************************************************************************************//
 void RFID_setup () 
 {
-  Serial.begin (9600);                                           // Initialize serial communications with the PC
-  SPI.begin ();                                                  // Init SPI bus
-  mfrc522.PCD_Init ();                                              // Init MFRC522 card
+    Serial.begin (9600);      // Initialize serial communications with the PC
+    SPI.begin ();             // Init SPI bus
+    mfrc522.PCD_Init ();      // Init MFRC522 card
 }
 
-//*****************************************************************************************//
 void On_RFID_Verify () 
 {
+    // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
+    MFRC522::MIFARE_Key key;
+    for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 
-  // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
-  MFRC522::MIFARE_Key key;
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+    //some variables we need
+    MFRC522::StatusCode status;
 
-  //some variables we need
-  MFRC522::StatusCode status;
-
-  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-  if ( ! mfrc522.PICC_IsNewCardPresent()) 
-  {
-    return;
-  }
-
-  // Select one of the cards
-  if ( ! mfrc522.PICC_ReadCardSerial()) 
-  {
-    return;
-  }
-
-  Serial.println(F("**Card Detected:**"));
-
-  mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
-
-  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
-  
-  //Serial.println(F("Authenticating using key A..."));
-  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid)); //line 834
-  if (status != MFRC522::STATUS_OK) 
-  {
-    Serial.print(F("Authentication failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-  else Serial.println(F("PCD_Authenticate() success: "));
-
-  //Read Password
-  status = mfrc522.MIFARE_Read(PasswordBlock, Buffer, &BufferSize);
-  if (status != MFRC522::STATUS_OK) 
-  {
-    Serial.print(F("Reading failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-  else Serial.println(F("MIFARE_Read() success: "));
-
-  Serial.print(F("Buffer: "));
-  for (uint8_t i = 0; i < 16; i++) {
-    Serial.write(Buffer[i] );
-  }
-
-  Serial.println(F("\n**End Reading**"));
-
-  mfrc522.PICC_HaltA();       // Halt PICC
-  mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
-
-  //Evaluate Password
-  PasswordMatched = true;
-  for (uint8_t i = 0; i < 16; i++) {
-    if (Buffer[i] != Password[i])
+    // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
+    if ( ! mfrc522.PICC_IsNewCardPresent()) 
     {
-      PasswordMatched = false;
-      continue;
+        return;
     }
-  }
 
-  Serial.println(PasswordMatched);
+    // Select one of the cards
+    if ( ! mfrc522.PICC_ReadCardSerial()) 
+    {
+        return;
+    }
+
+    Serial.println(F("**Card Detected:**"));
+
+    mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
+
+    //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
+    
+    //Serial.println(F("Authenticating using key A..."));
+    status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid)); //line 834
+    if (status != MFRC522::STATUS_OK) 
+    {
+        Serial.print(F("Authentication failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        return;
+    }
+    else Serial.println(F("PCD_Authenticate() success: "));
+
+    //Read Password
+    status = mfrc522.MIFARE_Read(PasswordBlock, Buffer, &BufferSize);
+    if (status != MFRC522::STATUS_OK) 
+    {
+        Serial.print(F("Reading failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        return;
+    }
+    else Serial.println(F("MIFARE_Read() success: "));
+
+    Serial.print(F("Buffer: "));
+    for (uint8_t i = 0; i < 16; i++) 
+    {
+        Serial.write(Buffer[i] );
+    }
+
+    Serial.println(F("\n**End Reading**"));
+
+    mfrc522.PICC_HaltA();       // Halt PICC
+    mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
+
+    //Evaluate Password
+    PasswordMatched = true;
+    for (uint8_t i = 0; i < 16; i++) 
+    {
+        if (Buffer[i] != Password[i])
+        {
+            PasswordMatched = false;
+            continue;
+        }
+    }
+    LoggedIn = !LoggedIn;
+    Serial.println(LoggedIn);
 }
 
 void On_RFID_Register () 
 {
+    // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
+    MFRC522::MIFARE_Key key;
+    for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 
-  // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
-  MFRC522::MIFARE_Key key;
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+    //some variables we need
+    MFRC522::StatusCode status;
 
-  //some variables we need
-  MFRC522::StatusCode status;
-
-  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-  if ( ! mfrc522.PICC_IsNewCardPresent()) 
-  {
-    return;
-  }
-
-  // Select one of the cards
-  if ( ! mfrc522.PICC_ReadCardSerial()) 
-  {
-    return;
-  }
-
-  Serial.println(F("**Card Detected:**"));
-
-  mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
-
-  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
-
-  //Serial.println(F("Authenticating using key A..."));
-  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid));
-  if (status != MFRC522::STATUS_OK) 
-  {
-    Serial.print(F("PCD_Authenticate() failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-  else Serial.println(F("PCD_Authenticate() success: "));
-
-  //Read Password
-  status = mfrc522.MIFARE_Read(PasswordBlock, Buffer, &BufferSize);
-  if (status != MFRC522::STATUS_OK) 
-  {
-    Serial.print(F("Reading failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-  else Serial.println(F("MIFARE_Read() success: "));
-
-  Serial.print(F("Buffer: "));
-  for (uint8_t i = 0; i < 16; i++) {
-    Serial.write(Buffer[i] );
-  }
-
-  Serial.println(F("\n**End Reading**"));
-
-  //Evaluate Password
-  PasswordMatched = true;
-  for (uint8_t i = 0; i < 16; i++) {
-    if (Buffer[i] != Password[i])
+    // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
+    if ( ! mfrc522.PICC_IsNewCardPresent()) 
     {
-      PasswordMatched = false;
-      continue;
+        return;
     }
-  }
 
-  if (PasswordMatched)
-  {
-    Serial.println ("Authenticated Card");
-    Serial.println ("Card Aproval Canceled");
-    Serial.print (F("NumberOfCard: "));
-    Serial.print (NumberOfCard);
-  }
-  else
-  { // Write Password
-    status = mfrc522.MIFARE_Write(PasswordBlock, Password, 16);
+    // Select one of the cards
+    if ( ! mfrc522.PICC_ReadCardSerial()) 
+    {
+        return;
+    }
+
+    Serial.println(F("**Card Detected:**"));
+
+    mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
+
+    //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
+
+    //Serial.println(F("Authenticating using key A..."));
+    status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid));
     if (status != MFRC522::STATUS_OK) 
     {
-      Serial.print(F("MIFARE_Write() failed: "));
-      Serial.println(mfrc522.GetStatusCodeName(status));
-      return;
+        Serial.print(F("PCD_Authenticate() failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        return;
     }
-    else Serial.println(F("MIFARE_Write() success: "));
+    else Serial.println(F("PCD_Authenticate() success: "));
 
-    Serial.print(F("Password: "));
+    //Read Password
+    status = mfrc522.MIFARE_Read(PasswordBlock, Buffer, &BufferSize);
+    if (status != MFRC522::STATUS_OK) 
+    {
+        Serial.print(F("Reading failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        return;
+    }
+    else Serial.println(F("MIFARE_Read() success: "));
+
+    Serial.print(F("Buffer: "));
     for (uint8_t i = 0; i < 16; i++) 
     {
-      Serial.write(Password[i] );
+        Serial.write(Buffer[i] );
     }
 
-    NumberOfCard ++;
-    Serial.print (F("\nNumberOfCard: "));
-    Serial.print (NumberOfCard);
+    Serial.println(F("\n**End Reading**"));
 
-    Serial.println(F("\n**End Writing**"));
-  }  
-  
-  mfrc522.PICC_HaltA();       // Halt PICC
-  mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
+    //Evaluate Password
+    PasswordMatched = true;
+    for (uint8_t i = 0; i < 16; i++) 
+    {
+        if (Buffer[i] != Password[i])
+        {
+            PasswordMatched = false;
+            continue;
+        }
+    }
+
+    if (PasswordMatched)
+    {
+        Serial.println ("Authenticated Card");
+        Serial.println ("Card Aproval Canceled");
+        Serial.print (F("NumberOfCard: "));
+        Serial.print (NumberOfCard);
+    }
+    else
+    {   // Write Password
+        status = mfrc522.MIFARE_Write(PasswordBlock, Password, 16);
+        if (status != MFRC522::STATUS_OK) 
+        {
+            Serial.print(F("MIFARE_Write() failed: "));
+            Serial.println(mfrc522.GetStatusCodeName(status));
+            return;
+        }
+        else Serial.println(F("MIFARE_Write() success: "));
+
+        Serial.print(F("Password: "));
+        for (uint8_t i = 0; i < 16; i++) 
+        {
+            Serial.write(Password[i] );
+        }
+
+        NumberOfCard ++;
+        Serial.print (F("\nNumberOfCard: "));
+        Serial.print (NumberOfCard);
+
+        Serial.println(F("\n**End Writing**"));
+    }  
+    
+    mfrc522.PICC_HaltA();       // Halt PICC
+    mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
 }
 
 void On_RFID_Disprove () 
 {
+    // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
+    MFRC522::MIFARE_Key key;
+    for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 
-  // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
-  MFRC522::MIFARE_Key key;
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
+    //some variables we need
+    MFRC522::StatusCode status;
 
-  //some variables we need
-  MFRC522::StatusCode status;
-
-  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-  if ( ! mfrc522.PICC_IsNewCardPresent()) 
-  {
-    return;
-  }
-
-  // Select one of the cards
-  if ( ! mfrc522.PICC_ReadCardSerial()) 
-  {
-    return;
-  }
-
-  Serial.println(F("**Card Detected:**"));
-
-  mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
-
-  //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
-
-  //Serial.println(F("Authenticating using key A..."));
-  status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid));
-  if (status != MFRC522::STATUS_OK) 
-  {
-    Serial.print(F("PCD_Authenticate() failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-  else Serial.println(F("PCD_Authenticate() success: "));
-
-  //Read Password
-  status = mfrc522.MIFARE_Read(PasswordBlock, Buffer, &BufferSize);
-  if (status != MFRC522::STATUS_OK) 
-  {
-    Serial.print(F("Reading failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-  else Serial.println(F("MIFARE_Read() success: "));
-
-  Serial.print(F("Buffer: "));
-  for (uint8_t i = 0; i < 16; i++) {
-    Serial.write(Buffer[i] );
-  }
-
-  Serial.println(F("\n**End Reading**"));
-
-  //Evaluate Password
-  PasswordMatched = true;
-  for (uint8_t i = 0; i < 16; i++) {
-    if (Buffer[i] != Password[i])
+    // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
+    if ( ! mfrc522.PICC_IsNewCardPresent()) 
     {
-      PasswordMatched = false;
-      continue;
+       return;
     }
-  }
 
-  if (PasswordMatched)
-  {
-    if (NumberOfCard < 2)
+    // Select one of the cards
+    if ( ! mfrc522.PICC_ReadCardSerial()) 
     {
-      Serial.println ("Insufficent Cards");
-      Serial.println ("Card Disproval Canceled");
-      Serial.print (F("NumberOfCard: "));
-      Serial.print (NumberOfCard);
+        return;
     }
-    else
-    { // Erase Password
-      status = mfrc522.MIFARE_Write(PasswordBlock, Eraser, 16);
-      if (status != MFRC522::STATUS_OK) 
-      {
-        Serial.print(F("MIFARE_Write() failed: "));
+
+    Serial.println(F("**Card Detected:**"));
+
+    mfrc522.PICC_DumpDetailsToSerial(&(mfrc522.uid)); //dump some details about the card
+
+    //mfrc522.PICC_DumpToSerial(&(mfrc522.uid));      //uncomment this to see all blocks in hex
+
+    //Serial.println(F("Authenticating using key A..."));
+    status = mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, 1, &key, &(mfrc522.uid));
+    if (status != MFRC522::STATUS_OK) 
+    {
+        Serial.print(F("PCD_Authenticate() failed: "));
         Serial.println(mfrc522.GetStatusCodeName(status));
         return;
-      }
-      else Serial.println(F("MIFARE_Write() success: "));
-
-      Serial.print(F("Erased Password: "));
-      for (uint8_t i = 0; i < 16; i++) 
-      {
-        Serial.write(Eraser[i] );
-      }
-
-      NumberOfCard --;
-      Serial.print (F("\nNumberOfCard: "));
-      Serial.print (NumberOfCard);
-
-      Serial.println(F("\n**End Writing**"));
     }
-  }  
-  else
-  {
-    Serial.println ("Password Dose Not Matched");
-    Serial.println ("Card Disproval Canceled");
-  }
+    else Serial.println(F("PCD_Authenticate() success: "));
 
-  mfrc522.PICC_HaltA();       // Halt PICC
-  mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
+    //Read Password
+    status = mfrc522.MIFARE_Read(PasswordBlock, Buffer, &BufferSize);
+    if (status != MFRC522::STATUS_OK) 
+    {
+        Serial.print(F("Reading failed: "));
+        Serial.println(mfrc522.GetStatusCodeName(status));
+        return;
+    }
+    else Serial.println(F("MIFARE_Read() success: "));
+
+    Serial.print(F("Buffer: "));
+    for (uint8_t i = 0; i < 16; i++) 
+    {
+        Serial.write(Buffer[i] );
+    }
+
+    Serial.println(F("\n**End Reading**"));
+
+    //Evaluate Password
+    PasswordMatched = true;
+    for (uint8_t i = 0; i < 16; i++) 
+    {
+        if (Buffer[i] != Password[i])
+        {
+            PasswordMatched = false;
+            continue;
+        }
+    }
+
+    if (PasswordMatched)
+    {
+        if (NumberOfCard < 2)
+        {
+            Serial.println ("Insufficent Cards");
+            Serial.println ("Card Disproval Canceled");
+            Serial.print (F("NumberOfCard: "));
+            Serial.print (NumberOfCard);
+        }
+        else
+        {   // Erase Password
+            status = mfrc522.MIFARE_Write(PasswordBlock, Eraser, 16);
+            if (status != MFRC522::STATUS_OK) 
+            {
+                Serial.print(F("MIFARE_Write() failed: "));
+                Serial.println(mfrc522.GetStatusCodeName(status));
+                return;
+            }
+            else Serial.println(F("MIFARE_Write() success: "));
+
+            Serial.print(F("Erased Password: "));
+            for (uint8_t i = 0; i < 16; i++) 
+            {
+                Serial.write(Eraser[i] );
+            }
+
+            NumberOfCard --;
+            Serial.print (F("\nNumberOfCard: "));
+            Serial.print (NumberOfCard);
+
+            Serial.println(F("\n**End Writing**"));
+        }
+    }  
+    else
+    {
+        Serial.println ("Password Dose Not Matched");
+        Serial.println ("Card Disproval Canceled");
+    }
+
+    mfrc522.PICC_HaltA();       // Halt PICC
+    mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
 }
 //*****************************************************************************************//
