@@ -69,6 +69,11 @@ void loop()
         {
             Serial.println("on Unlock");
             On_RFID_Verify ();
+            delay (5000);
+            PasswordMatched = true;
+            LoggedIn = true;
+            prev_state = St_Unlock;
+            state = St_LCD_Button;
             break;
         }
         case St_Register:
@@ -76,10 +81,22 @@ void loop()
             Serial.println("on Register");
             On_RFID_Register ();
             delay (5000);
+            PasswordMatched = false;
             prev_state = St_Register;
             state = St_LCD_Button;
             break;
         }
+        case St_Disprove:
+        {
+            Serial.println("on Disprove");
+            On_RFID_Disprove ();
+            delay (5000);
+            PasswordMatched = true;
+            prev_state = St_Disprove;
+            state = St_LCD_Button;
+            break;
+        }
+
         case St_ConnectionCheck: 
         {
             Serial.println("on ConCheck");

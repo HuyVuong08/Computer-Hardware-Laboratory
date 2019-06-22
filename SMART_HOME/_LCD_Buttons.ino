@@ -149,17 +149,17 @@ Button whichButPressed ()
         return Bt_Dublicate;
     }
  
-    if (tmp >= 70 && tmp <= 80)
+    if (tmp >= 70 && tmp <= 100)
     {
         prev = tmp;
         return Bt_Up;
     }
-    if (tmp >= 100 && tmp <= 110)
+    if (tmp >= 101 && tmp <= 130)
     {        
         prev = tmp;
         return Bt_Backward;
     } 
-    if (tmp >= 190 && tmp <= 200)
+    if (tmp >= 190 && tmp <= 220)
     {       
         prev = tmp;
         return Bt_Down;  
@@ -238,6 +238,10 @@ void Backward_Button ()
             break;
 
         case Menu_LV1:
+            Menu = Menu_Off;
+            Home ();
+
+        case Menu_Off:
             Menu = Menu_Off;
             Home ();
 
@@ -493,10 +497,10 @@ void Disprove_Password_Not_Matched ()
 void Disprove_Insufficent_Cards ()
 {
     lcd.clear();
-    lcd.setCursor(3,0); 
-    lcd.print("AUTHORIZED");
+    lcd.setCursor(2,0); 
+    lcd.print("INSUFFICIENT");
     lcd.setCursor(6,1); 
-    lcd.print("CARD");
+    lcd.print("CARDs");
 }
 
 void Disprove_Success ()
@@ -511,9 +515,9 @@ void Disprove_Success ()
 void Menu_Chosen_Disprove ()
 {
     lcd.clear();
-    lcd.setCursor(2,0); 
+    lcd.setCursor(3,0); 
     lcd.print("DISPROVING");
-    lcd.setCursor(1,0); 
+    lcd.setCursor(6,1); 
     lcd.print("CARD");
 }
 
@@ -575,7 +579,7 @@ void Menu_Lv1_LogOut ()
     lcd.print("LOG OUT");
 
     lcd.setCursor(13,0); 
-    lcd.print("RE");
+    lcd.print("NO");
 
     lcd.setCursor(13,1); 
     lcd.print("SE");
@@ -652,7 +656,7 @@ void Display_Menu_Chosen ()
         }
         case Menu_Lv1_5:
         {            
-            Menu_Lv1_LogOut ();
+            Menu_Chosen_LogOut ();
             LoggedIn = false;
             state = St_Unlock;
             break;

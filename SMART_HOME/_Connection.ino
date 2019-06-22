@@ -36,8 +36,7 @@ void Send()
             {
                 sub_state = st_send_inMem;
 
-                Serial.print("Speed = "); Serial.println((int)Speed);
-                setTimer((int)Speed);
+                setTimer(1);
                 startTimer();
                 sub_state = st_wait;
             }
@@ -59,8 +58,7 @@ void Send()
 
                     client.stop();
 
-                    Serial.print("Speed = "); Serial.println((int)Speed);
-                    setTimer((int)Speed);
+                    setTimer(1);
                     startTimer();
                     sub_state = st_wait;
                 }
@@ -90,9 +88,8 @@ void Send()
             
             client.stop();
             
-            Serial.print("Speed = "); Serial.println((int)Speed);
             
-            setTimer((int)Speed);
+            setTimer(1);
             startTimer();
             state = St_Wait;
         }
