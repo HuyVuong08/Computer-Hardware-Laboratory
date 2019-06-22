@@ -124,6 +124,8 @@ void On_RFID_Verify ()
     state = St_LCD_Button;
 }
 
+//*****************************************************************************************//
+
 void On_RFID_Register () 
 {
     // Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
@@ -223,7 +225,12 @@ void On_RFID_Register ()
     
     mfrc522.PICC_HaltA();       // Halt PICC
     mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
+    
+    prev_state = St_Register;
+    state = St_LCD_Button;
 }
+
+//*****************************************************************************************//
 
 void On_RFID_Disprove () 
 {
@@ -332,5 +339,8 @@ void On_RFID_Disprove ()
 
     mfrc522.PICC_HaltA();       // Halt PICC
     mfrc522.PCD_StopCrypto1();  // Stop encryption on PCD
+
+    prev_state = St_Disprove;
+    state = St_LCD_Button;
 }
 //*****************************************************************************************//

@@ -39,7 +39,7 @@ void setup()
 
     // init state
     state       = St_Greeting;
-    sub_state   = st_calib_noload;
+    sub_state   = st_idle;
     
     // set up watchdog 1s
     // 5ph k can --> sleep

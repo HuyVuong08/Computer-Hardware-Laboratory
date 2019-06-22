@@ -57,11 +57,27 @@ void LCD_Button()
             Menu_Chosen_LogOut ();
         else      
             LogIn_Fail ();
+            
         Menu = Menu_Off;
         break;
 
     case St_Register:
-        Register_Success ();
+        if (PasswordMatched)
+            Register_Authorized_Card ();
+        else
+            Register_Success ();
+
+        Menu = Menu_Off;
+        break;
+
+    case St_Disprove:
+        if (PasswordMatched == true && NumberOfCards < 2)
+            Disprove_Insufficent_Cards ();
+        else if (PasswordMatched == true && NumberOfCards > 1)
+            Disprove_Success ();
+        else if (PasswordMatched == false)
+            Disprove_Password_Not_Matched ();
+
         Menu = Menu_Off;
         break;
 

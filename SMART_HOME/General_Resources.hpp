@@ -23,9 +23,10 @@ enum State {St_Greeting,
 
 enum State   state, prev_state;
 
-enum SubState {st_calib_noload, st_calib, st_wait,          // for Calibrate state
-               st_readSensor,                               // for ReadSensor state
-               st_send_new, st_send_inMem, st_send_done};   // for Send state
+enum SubState { st_idle,
+                st_wait,          
+                st_readSensor,                               // for ReadSensor state
+                st_send_new, st_send_inMem, st_send_done};   // for Send state
 
 enum SubState sub_state;
 
