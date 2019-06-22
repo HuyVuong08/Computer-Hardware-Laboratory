@@ -27,34 +27,24 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance
 
-int NumberOfCard     = 1;
 byte Buffer[18];
-byte BufferSize      = 18;
+byte BufferSize    = 18;
 
 
-byte Password[18]    = "12345";
-byte Eraser[16]      = "000000000000000";
-byte PasswordBlock   = 2;
+byte Password[18]  = "12345";
+byte Eraser[16]    = "000000000000000";
+byte PasswordBlock = 2;
 
 
-extern bool LoggedIn = false;
-extern bool PasswordMatched = true;
-extern 
+extern int  NumberOfCards;
+extern bool LoggedIn;
+extern bool PasswordMatched;
+extern enum State state, prev_state;
 
-void setup ()
-{
-    RFID_setup ();
-}   
-
-void loop ()
-{
-    On_RFID_Verify ();
-}
 
 //*****************************************************************************************//
-void RFID_setup () 
+void RFID_Setup () 
 {
-    Serial.begin (9600);      // Initialize serial communications with the PC
     SPI.begin ();             // Init SPI bus
     mfrc522.PCD_Init ();      // Init MFRC522 card
 }
@@ -129,6 +119,9 @@ void On_RFID_Verify ()
     }
     LoggedIn = !LoggedIn;
     Serial.println(LoggedIn);
+
+    prev_state = St_Unlock;
+    state = St_LCD_Button;
 }
 
 void On_RFID_Register () 
@@ -202,7 +195,7 @@ void On_RFID_Register ()
         Serial.println ("Authenticated Card");
         Serial.println ("Card Aproval Canceled");
         Serial.print (F("NumberOfCard: "));
-        Serial.print (NumberOfCard);
+        Serial.print (NumberOfCards);
     }
     else
     {   // Write Password
@@ -221,9 +214,9 @@ void On_RFID_Register ()
             Serial.write(Password[i] );
         }
 
-        NumberOfCard ++;
+        NumberOfCards ++;
         Serial.print (F("\nNumberOfCard: "));
-        Serial.print (NumberOfCard);
+        Serial.print (NumberOfCards);
 
         Serial.println(F("\n**End Writing**"));
     }  
@@ -300,12 +293,12 @@ void On_RFID_Disprove ()
 
     if (PasswordMatched)
     {
-        if (NumberOfCard < 2)
+        if (NumberOfCards < 2)
         {
             Serial.println ("Insufficent Cards");
             Serial.println ("Card Disproval Canceled");
             Serial.print (F("NumberOfCard: "));
-            Serial.print (NumberOfCard);
+            Serial.print (NumberOfCards);
         }
         else
         {   // Erase Password
@@ -324,9 +317,9 @@ void On_RFID_Disprove ()
                 Serial.write(Eraser[i] );
             }
 
-            NumberOfCard --;
+            NumberOfCards --;
             Serial.print (F("\nNumberOfCard: "));
-            Serial.print (NumberOfCard);
+            Serial.print (NumberOfCards);
 
             Serial.println(F("\n**End Writing**"));
         }

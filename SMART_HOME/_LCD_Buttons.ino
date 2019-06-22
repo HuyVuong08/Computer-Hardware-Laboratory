@@ -20,19 +20,20 @@ bool Start = false;
 
 typedef enum {Bt_NoPress, Bt_Enter, Bt_Down, Bt_Backward, Bt_Up, Bt_Dublicate} Button;
 enum Menu {Menu_Off, Menu_LV1, Menu_Chosen};
-enum Menu_Lv1 {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3};
+enum Menu_Lv1 {Menu_Lv1_1, Menu_Lv1_2, Menu_Lv1_3, Menu_Lv1_4, Menu_Lv1_5};
 
 
-enum Menu Menu = Menu_Off;
+enum Menu     Menu = Menu_Off;
 enum Menu_Lv1 Menu_Lv1 = Menu_Lv1_1;
 
 
-extern bool LoggedIn;
-extern bool PasswordMatched;
+extern int   NumberOfCards;
+extern bool  LoggedIn;
+extern bool  PasswordMatched;
 extern float Humidity;
 extern float Temperature;
-extern enum State    state, prev_state;
-extern enum SubState sub_state;
+extern enum  State    state, prev_state;
+extern enum  SubState sub_state;
 
 
 Button whichButPressed ();
@@ -121,6 +122,8 @@ void LCD_Button()
 // }
 // end testing
 
+//*****************************************************************************************//
+
 Button whichButPressed ()
 {
     int tmp = analogRead(A0);
@@ -155,6 +158,8 @@ Button whichButPressed ()
     return Bt_NoPress;
 }
 
+//*****************************************************************************************//
+
 void Enter_Button ()
 {
     if (Start == false)
@@ -181,7 +186,15 @@ void Enter_Button ()
         {
             Menu = Menu_Chosen;
             Display_Menu_Chosen ();
+            break;
         }
+        case Menu_Chosen: 
+        {
+            Menu = Menu_Off;
+            Home ();
+            break;
+        }
+
         default:
             break;
     }
@@ -217,6 +230,9 @@ void Backward_Button ()
     }
 }
 
+//*****************************************************************************************//
+
+
 void Down_Button ()
 {
     if (Start == false)
@@ -245,7 +261,16 @@ void Down_Button ()
             break;
 
         case Menu_Lv1_3:
+            Menu_Lv1 = Menu_Lv1_4;
+            break;
+
+        case Menu_Lv1_4:
+            Menu_Lv1 = Menu_Lv1_5;
+            break;
+
+        case Menu_Lv1_5:
             Menu_Lv1 = Menu_Lv1_1;
+            break;
 
         default:
             break;
@@ -273,6 +298,14 @@ void Up_Button ()
 
     switch (Menu_Lv1)
     {
+        case Menu_Lv1_5:
+            Menu_Lv1 = Menu_Lv1_4;       
+            break;
+
+        case Menu_Lv1_4:
+            Menu_Lv1 = Menu_Lv1_3;       
+            break;
+
         case Menu_Lv1_3:
             Menu_Lv1 = Menu_Lv1_2;       
             break;
@@ -282,7 +315,8 @@ void Up_Button ()
             break;
 
         case Menu_Lv1_1:
-            Menu_Lv1 = Menu_Lv1_3;
+            Menu_Lv1 = Menu_Lv1_5;
+            break;
 
         default:
             break;
@@ -290,6 +324,8 @@ void Up_Button ()
 
     Display_Menu_Lv1 ();
 }
+
+//*****************************************************************************************//
 
 void On_Greeting() {
     lcd.clear();
@@ -308,7 +344,6 @@ void On_Greeting() {
 void Home ()
 {
     lcd.clear();
-
     lcd.setCursor(0,0); 
     lcd.print("TEM: ");
     lcd.setCursor(5,0); 
@@ -323,6 +358,8 @@ void Home ()
     lcd.setCursor(10,1); 
     lcd.print('%');
 }
+
+//*****************************************************************************************//
 
 void Locked ()
 {
@@ -351,14 +388,7 @@ void LogIn_Fail ()
     lcd.print("DENIED");
 }
 
-void Register_Success ()
-{
-    lcd.clear();
-    lcd.setCursor(1,0); 
-    lcd.print("AUTHORIZATION");
-    lcd.setCursor(4,1); 
-    lcd.print("COMPLETE");
-}
+//*****************************************************************************************//
 
 void SMS_Sent ()
 {
@@ -383,8 +413,32 @@ void Menu_Lv1_SendSMS ()
     lcd.clear();
     lcd.setCursor(0,0); 
     lcd.print("SEND SMS");
+
+    lcd.setCursor(13,0); 
+    lcd.print("LO");
+
     lcd.setCursor(13,1); 
-    lcd.print("RG");
+    lcd.print("RE");
+}
+
+//*****************************************************************************************//
+
+void Register_Authorized_Card ()
+{
+    lcd.clear();
+    lcd.setCursor(3,0); 
+    lcd.print("AUTHORIZED");
+    lcd.setCursor(6,1); 
+    lcd.print("CARD");
+}
+
+void Register_Success ()
+{
+    lcd.clear();
+    lcd.setCursor(1,0); 
+    lcd.print("AUTHORIZATION");
+    lcd.setCursor(4,1); 
+    lcd.print("COMPLETE");
 }
 
 void Menu_Chosen_Register ()
@@ -403,18 +457,98 @@ void Menu_Lv1_Register ()
     lcd.print("REGISTER");
 
     lcd.setCursor(13,0); 
-    lcd.print("SS");
+    lcd.print("SE");
+
+    lcd.setCursor(13,1); 
+    lcd.print("DI");
+}
+
+//*****************************************************************************************//
+
+void Disprove_Password_Not_Matched ()
+{
+    lcd.clear();
+    lcd.setCursor(2,0); 
+    lcd.print("UNAUTHORIZED");
+    lcd.setCursor(6,1); 
+    lcd.print("CARD");
+}
+
+void Disprove_Insufficent_Cards ()
+{
+    lcd.clear();
+    lcd.setCursor(3,0); 
+    lcd.print("AUTHORIZED");
+    lcd.setCursor(6,1); 
+    lcd.print("CARD");
+}
+
+void Disprove_Success ()
+{
+    lcd.clear();
+    lcd.setCursor(4,0); 
+    lcd.print("DISPROVAL");
+    lcd.setCursor(4,1); 
+    lcd.print("COMPLETE");
+}
+
+void Menu_Chosen_Disprove ()
+{
+    lcd.clear();
+    lcd.setCursor(2,0); 
+    lcd.print("DISPROVING");
+    lcd.setCursor(1,0); 
+    lcd.print("CARD");
+}
+
+void Menu_Lv1_Disprove ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("DISPROVE");
+
+    lcd.setCursor(13,0); 
+    lcd.print("RE");
+
+    lcd.setCursor(13,1); 
+    lcd.print("NO");
+}
+
+//*****************************************************************************************//
+
+void Menu_Chosen_NumberOfCards ()
+{
+    lcd.clear();
+    lcd.setCursor(1,0); 
+    lcd.print("AUTHORIZED");
+    lcd.setCursor(1,1); 
+    lcd.print("CARDS: ");
+
+    lcd.setCursor(10,1);
+    lcd.print(NumberOfCards);
+}
+
+void Menu_Lv1_NumberOfCards ()
+{
+    lcd.clear();
+    lcd.setCursor(0,0); 
+    lcd.print("N.O CARDS");
+
+    lcd.setCursor(13,0); 
+    lcd.print("DI");
 
     lcd.setCursor(13,1); 
     lcd.print("LO");
 }
+
+//*****************************************************************************************//
 
 void Menu_Chosen_LogOut ()
 {
     lcd.clear();
     lcd.setCursor(2,0); 
     lcd.print("LOGGED OUT");
-    lcd.setCursor(1,0); 
+    lcd.setCursor(1,1); 
     lcd.print("SYSTEM LOCKED");
 }
 
@@ -423,9 +557,15 @@ void Menu_Lv1_LogOut ()
     lcd.clear();
     lcd.setCursor(0,0); 
     lcd.print("LOG OUT");
+
     lcd.setCursor(13,0); 
-    lcd.print("RG");
+    lcd.print("RE");
+
+    lcd.setCursor(13,1); 
+    lcd.print("SE");
 }
+
+//*****************************************************************************************//
 
 void Display_Menu_Lv1 ()
 {
@@ -443,7 +583,16 @@ void Display_Menu_Lv1 ()
             break;
 
         case Menu_Lv1_3:
+            Menu_Lv1_Disprove ();
+            break;
+
+        case Menu_Lv1_4:
+            Menu_Lv1_NumberOfCards ();
+            break;
+
+        case Menu_Lv1_5:
             Menu_Lv1_LogOut ();
+            break;
 
         default:
             break;
@@ -472,10 +621,26 @@ void Display_Menu_Chosen ()
             break;
         }
         case Menu_Lv1_3:
-            Menu_Chosen_LogOut ();
+        {           
+            Menu_Chosen_Disprove ();
+            prev_state = St_LCD_Button;
+            state = St_Disprove;
+            break;
+        }
+        case Menu_Lv1_4:
+        {           
+            Menu_Chosen_NumberOfCards ();
+            prev_state = St_LCD_Button;
+            state = St_Wait;
+            break;
+        }
+        case Menu_Lv1_5:
+        {            
+            Menu_Lv1_LogOut ();
             LoggedIn = false;
             state = St_Unlock;
-
+            break;
+        }
         default:
             break;
     }

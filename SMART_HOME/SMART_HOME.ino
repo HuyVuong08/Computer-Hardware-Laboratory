@@ -68,12 +68,7 @@ void loop()
         case St_Unlock: 
         {
             Serial.println("on Unlock");
-            On_RFID_LogIn ();
-            delay (5000);
-            LoggedIn = true;
-            PasswordMatched = true;
-            prev_state = St_Unlock;
-            state = St_LCD_Button;
+            On_RFID_Verify ();
             break;
         }
         case St_Register:

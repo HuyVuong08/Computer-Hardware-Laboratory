@@ -4,12 +4,23 @@
 float Humidity;
 float Temperature;
 
-bool LoggedIn = false;
+int  NumberOfCards   = 1;
+bool LoggedIn        = false;
 bool PasswordMatched = false;
 
 // for states
-enum State {St_Greeting, St_Unlock, St_Register, St_ConnectionCheck, St_ReadSensor, St_Wait, 
-            St_LCD_Button, St_Send,  St_SaveMem, St_SendSMS};
+enum State {St_Greeting, 
+            St_Unlock, 
+            St_Register, 
+            St_Disprove, 
+            St_ConnectionCheck, 
+            St_ReadSensor, 
+            St_Wait, 
+            St_LCD_Button, 
+            St_Send,  
+            St_SaveMem, 
+            St_SendSMS};
+
 enum State   state, prev_state;
 
 enum SubState {st_calib_noload, st_calib, st_wait,          // for Calibrate state
