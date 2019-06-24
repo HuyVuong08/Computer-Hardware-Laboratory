@@ -82,6 +82,7 @@ void loop()
             On_RFID_Register ();
             delay (5000);
             PasswordMatched = false;
+            NumberOfCards ++;
             prev_state = St_Register;
             state = St_LCD_Button;
             break;

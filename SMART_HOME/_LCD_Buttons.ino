@@ -181,6 +181,7 @@ void Enter_Button ()
     if (Start == false)
     {
         Start = true;
+        Locked ();
         return;
     }    
     else if (LoggedIn == false)
@@ -221,6 +222,7 @@ void Backward_Button ()
     if (Start == false)
     {
         Start = true;
+        Locked ();
         return;
     }
 
@@ -257,7 +259,8 @@ void Down_Button ()
 {
     if (Start == false)
     {
-        Start = true;
+        Start = true;    
+        Locked ();
         return;
     }
 
@@ -304,6 +307,7 @@ void Up_Button ()
     if (Start == false)
     {
         Start = true;
+        Locked ();
         return;
     }
 
